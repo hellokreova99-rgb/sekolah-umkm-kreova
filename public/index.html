@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#14204F">
+<meta name="description" content="Sekolah UMKM Kreova: sekolah virtual gratis untuk penjual online dan UMKM.">
+<title>Sekolah UMKM Kreova · Sekolah Virtual</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="viewport" aria-label="Peta Sekolah UMKM Kreova">
+  <div id="world">
+    <div id="map"></div>
+    <svg id="overlay" viewBox="0 0 1080 2880" aria-hidden="true">
+      <!-- lambang di atas gerbang -->
+      <image href="/lambang.svg" x="285" y="2058" width="110" height="162"/>
+      <!-- papan pengumuman -->
+      <g transform="translate(92 2150)">
+        <ellipse cx="0" cy="92" rx="62" ry="10" fill="#000" opacity=".14"/>
+        <rect x="-48" y="20" width="9" height="74" fill="#8A5A34"/><rect x="39" y="20" width="9" height="74" fill="#8A5A34"/>
+        <rect x="-62" y="-44" width="124" height="82" rx="8" fill="#C9A77A"/><rect x="-54" y="-36" width="108" height="66" rx="4" fill="#FFF8EC"/>
+        <rect x="-44" y="-26" width="54" height="8" rx="3" fill="#14204F"/>
+        <rect x="-44" y="-10" width="86" height="5" rx="2" fill="#C8CEDD"/><rect x="-44" y="2" width="86" height="5" rx="2" fill="#C8CEDD"/><rect x="-44" y="14" width="60" height="5" rx="2" fill="#C8CEDD"/>
+        <circle cx="38" cy="-22" r="7" fill="#D83A34"/>
+      </g>
+      <!-- kotak usulan -->
+      <g transform="translate(612 2170)">
+        <ellipse cx="0" cy="58" rx="58" ry="10" fill="#000" opacity=".14"/>
+        <rect x="-8" y="10" width="16" height="48" fill="#0C1538"/>
+        <rect x="-50" y="-52" width="100" height="70" rx="8" fill="#14204F"/><rect x="-30" y="-44" width="60" height="8" rx="4" fill="#0C1538"/>
+        <rect x="-40" y="-20" width="80" height="26" rx="5" fill="#F5C518"/>
+        <text x="0" y="-1" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="15" fill="#14204F">USULAN</text>
+        <rect x="-16" y="-66" width="28" height="22" rx="2" fill="#FFFFFF" transform="rotate(-12)"/>
+      </g>
+      <!-- pos kas kelas -->
+      <g transform="translate(398 2470)">
+        <ellipse cx="0" cy="56" rx="60" ry="10" fill="#000" opacity=".14"/>
+        <rect x="-46" y="-6" width="92" height="62" fill="#F4E6CC"/><rect x="-34" y="10" width="68" height="22" fill="#FFFFFF" stroke="#6A4A2E" stroke-width="3"/>
+        <path d="M-56 -4 L0 -44 L56 -4 Z" fill="#F5C518"/><path d="M-56 -4 L56 -4 L50 4 L-50 4 Z" fill="#C99E0A"/>
+        <circle cx="0" cy="-20" r="11" fill="#14204F"/><text x="0" y="-15" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="13" fill="#F5C518">K</text>
+      </g>
+      <!-- dinding angkatan pertama -->
+      <g transform="translate(692 1900)">
+        <ellipse cx="0" cy="62" rx="96" ry="12" fill="#000" opacity=".14"/>
+        <rect x="-88" y="-60" width="176" height="122" rx="6" fill="#B9A78C"/>
+        <rect x="-80" y="-52" width="160" height="106" rx="4" fill="#E9DFC9"/>
+        <rect x="-60" y="-80" width="120" height="30" rx="6" fill="#14204F"/>
+        <text x="0" y="-60" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="13" fill="#F5C518">ANGKATAN I</text>
+        <g fill="#8C7B61"><rect x="-68" y="-40" width="58" height="5" rx="2"/><rect x="8" y="-40" width="60" height="5" rx="2"/><rect x="-68" y="-26" width="46" height="5" rx="2"/><rect x="8" y="-26" width="52" height="5" rx="2"/><rect x="-68" y="-12" width="62" height="5" rx="2"/><rect x="8" y="-12" width="40" height="5" rx="2"/><rect x="-68" y="2" width="50" height="5" rx="2"/><rect x="8" y="2" width="58" height="5" rx="2"/><rect x="-68" y="16" width="56" height="5" rx="2"/><rect x="8" y="16" width="48" height="5" rx="2"/><rect x="-68" y="30" width="40" height="5" rx="2"/><rect x="8" y="30" width="56" height="5" rx="2"/></g>
+      </g>
+      <!-- gembok koperasi -->
+      <g transform="translate(560 2588)"><circle r="20" fill="#14204F"/><rect x="-9" y="-3" width="18" height="14" rx="3" fill="#F5C518"/><path d="M-6 -3 V-8 a6 6 0 0 1 12 0 V-3" stroke="#F5C518" stroke-width="3.5" fill="none"/></g>
+    </svg>
+
+    <button class="spot" data-spot="gerbang" style="left:340px;top:2240px;width:420px;height:150px" aria-label="Gerbang sekolah"><span class="pill" style="top:168px"><span class="dot"></span>Gerbang</span></button>
+    <button class="spot" data-spot="pengumuman" style="left:92px;top:2150px;width:140px;height:150px" aria-label="Papan pengumuman"><span class="pill" style="top:172px">Pengumuman</span></button>
+    <button class="spot" data-spot="usulan" style="left:612px;top:2160px;width:130px;height:150px" aria-label="Kotak usulan"><span class="pill" style="top:150px"><span class="dot"></span>Kotak Usulan</span></button>
+    <button class="spot" data-spot="kaskelas" style="left:398px;top:2470px;width:130px;height:120px" aria-label="Pos Kas Kelas"><span class="pill redup" style="top:124px">Kas Kelas</span></button>
+    <button class="spot" data-spot="koperasi" style="left:520px;top:2640px;width:170px;height:110px" aria-label="Koperasi sekolah, masih terkunci"><span class="pill redup" style="top:116px">Koperasi · terkunci</span></button>
+    <button class="spot" data-spot="dinding" style="left:692px;top:1890px;width:190px;height:170px" aria-label="Dinding Angkatan Pertama"><span class="pill" style="top:186px"><span class="dot"></span>Dinding Angkatan I</span></button>
+    <button class="spot" data-spot="pasar" style="left:142px;top:1150px;width:220px;height:50px" aria-label="Pasar Murid, buka lapakmu"><span class="pill" style="top:-6px"><span class="dot"></span>Pasar Murid</span></button>
+    <div id="kelas-spots"></div>
+    <div id="lapak-lapisan"></div>
+    <div class="pill" style="left:347px;top:1752px;font-size:22px">Ruang Kelas · ketuk kavling</div>
+
+    <button id="naya" style="left:236px;top:2420px" aria-label="Bu Naya, kepala sekolah"><span class="bubble" id="bubble-naya">Halo, murid baru!</span><img src="/naya.svg" alt=""></button>
+    <div id="lapisan-murid"></div>
+    <div id="target"></div>
+  </div>
+</div>
+<div id="tint"></div>
+
+<div class="hud-top">
+  <div class="brand"><div class="perisai"><img src="/lambang.svg" alt=""></div><div><b>SEKOLAH UMKM KREOVA</b><span>Sekolah virtual · tanpa gedung, tanpa SPP</span></div></div>
+  <div class="chip" id="chip-online"><span class="lampu" id="lampu"></span><span id="teks-online">Menghubungkan…</span></div>
+  <div class="chip" id="chip-target" hidden></div>
+</div>
+<div class="hud-right">
+  <button class="ctl" id="zin" aria-label="Perbesar">+</button>
+  <button class="ctl" id="zout" aria-label="Perkecil">−</button>
+  <button class="ctl" id="home" aria-label="Kembali ke gerbang"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#14204F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></button>
+</div>
+<div class="hud-bawah">
+  <button class="aksi kuning" id="btn-absen">Absen hari ini</button>
+  <button class="aksi navy" id="btn-ngobrol" aria-label="Ngobrol"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.4A8 8 0 1 1 21 12z"/></svg></button>
+  <button class="aksi navy" id="btn-kartu" aria-label="Ubah kartu murid"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M14 10h4M14 14h3M6 16c.8-1.5 1.8-2 3-2s2.2.5 3 2"/></svg></button>
+</div>
+<div class="hint" id="hint">Ketuk tanah untuk berjalan · ketuk tempat atau murid lain</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<div id="scrim"></div>
+<div id="panel" role="dialog" aria-modal="true" aria-labelledby="p-judul"><button class="tutup" id="tutup" aria-label="Tutup">×</button><div id="p-isi"></div></div>
+
+<div id="daftar" role="dialog" aria-modal="true" aria-labelledby="km-judul">
+  <form class="kartu-murid" id="form-daftar" novalidate>
+    <div class="km-atas">
+      <div class="km-preview" id="km-preview"></div>
+      <div><p class="p-label" style="margin:0 0 4px">KARTU MURID</p><h2 class="p-judul" id="km-judul" style="margin:0;font-size:22px">Daftar jadi murid</h2><p class="catatan" style="margin:6px 0 0">Gratis. Nama ini terlihat oleh murid lain dan tertulis di Dinding Angkatan.</p></div>
+    </div>
+    <label class="f" for="in-nama">Nama panggilan</label>
+    <input class="f" id="in-nama" maxlength="16" autocomplete="nickname" placeholder="Contoh: Rina">
+    <label class="f" for="in-jualan">Kamu jualan apa?</label>
+    <input class="f" id="in-jualan" maxlength="24" placeholder="Contoh: hijab, kue kering, skincare">
+    <p class="f" style="font-weight:800;font-size:13px;color:#14204F;margin:14px 0 6px">Gaya</p>
+    <div class="pilihan" id="pil-rambut"></div>
+    <p class="f" style="font-weight:800;font-size:13px;color:#14204F;margin:12px 0 6px">Warna baju</p>
+    <div class="pilihan" id="pil-baju"></div>
+    <p class="f" style="font-weight:800;font-size:13px;color:#14204F;margin:12px 0 6px">Warna kulit</p>
+    <div class="pilihan" id="pil-kulit"></div>
+    <div class="salah" id="salah" role="alert"></div>
+    <button class="tombol kuning" type="submit">Masuk sekolah</button>
+  </form>
+</div>
+
+<div id="loading"><div class="perisai"><img src="/lambang.svg" alt=""></div><p>Membuka gerbang sekolah…</p><p class="tip">Layar ini tidak berubah? Kamu sedang membuka file di pratinjau yang tidak bisa menjalankan game. Buka sekolah lewat link situsnya di browser (Chrome atau Safari).</p></div>
+<script>setTimeout(function(){var l=document.getElementById("loading");if(l){l.style.opacity=0;setTimeout(function(){if(l.parentNode)l.parentNode.removeChild(l);},700);}},8000);</script>
+
+<script src="/peta.js"></script>
+<script src="/game.js"></script>
+</body>
+</html>

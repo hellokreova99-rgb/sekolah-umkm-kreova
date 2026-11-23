@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin · Sekolah UMKM Kreova</title>
+<style>
+  body { margin:0; font-family:system-ui, sans-serif; background:#FFF8EC; color:#14204F; }
+  main { max-width:760px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { font-size:24px; margin:0 0 4px; } h2 { font-size:18px; margin:28px 0 10px; }
+  .kartu { background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; box-shadow:0 3px 0 rgba(12,21,56,.08); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .kartu .isi { flex:1 1 220px; } .kartu small { color:#5A6487; display:block; }
+  button { min-height:44px; padding:0 16px; border-radius:12px; border:0; font-weight:700; font-size:14px; cursor:pointer; }
+  .setuju { background:#2BB673; color:#fff; } .tolak { background:#B3261E; color:#fff; } .netral { background:#14204F; color:#fff; }
+  input { min-height:44px; border-radius:12px; border:2px solid #D6DAEA; padding:0 12px; font-size:16px; width:100%; box-sizing:border-box; }
+  label { font-weight:700; font-size:14px; display:block; margin-bottom:6px; }
+  .angka { display:flex; gap:10px; flex-wrap:wrap; } .angka div { background:#14204F; color:#fff; border-radius:12px; padding:10px 14px; font-weight:700; }
+  .salah { color:#B3261E; font-weight:700; min-height:20px; }
+  .kosong { color:#5A6487; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Admin Sekolah UMKM Kreova</h1>
+  <p class="kosong">Setujui lapak Pasar Murid dan pantau angka sekolah. Halaman ini hanya bekerja dengan kunci admin.</p>
+  <form id="masuk">
+    <label for="kunci">Kunci admin (ADMIN_KEY)</label>
+    <input id="kunci" type="password" autocomplete="current-password">
+    <p><button class="netral" type="submit">Masuk</button></p>
+    <div class="salah" id="salah" role="alert"></div>
+  </form>
+  <section id="isi" hidden>
+    <div class="angka" id="angka"></div>
+    <h2>Lapak menunggu persetujuan</h2><div id="antrian"></div>
+    <h2>Lapak tampil di Pasar Murid</h2><div id="lapak"></div>
+    <p><button class="netral" id="muat">Muat ulang</button></p>
+  </section>
+</main>
+<script>
+var kunci = '';
+try { kunci = sessionStorage.getItem('kunciAdmin') || ''; } catch (e) {}
+var PILIHAN = ['Untung bocor','Perang harga','Chat di-ghosting','Pembeli nggak balik','Capek ngurus sendiri'];
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+function api(path, body) {
+  return fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-admin-key': kunci, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
+    .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.galat || 'Gagal'); return d; }); });
+}
+function tampil(d) {
+  document.getElementById('isi').hidden = false; document.getElementById('masuk').hidden = true;
+  document.getElementById('angka').innerHTML = '<div>' + d.total + ' murid terdaftar</div><div>' + d.online + ' online</div>'
+    + d.vote.map(function (v, i) { return '<div>' + (i + 1) + '. ' + PILIHAN[i] + ': ' + v + '</div>'; }).join('');
+  document.getElementById('antrian').innerHTML = d.antrian.length ? d.antrian.map(function (x) {
+    return '<div class="kartu"><div class="isi"><b>' + esc(x.usaha) + '</b><small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + ' · ' + esc(x.tgl) + '</small></div>'
+      + '<button class="setuju" data-uid="' + esc(x.uid) + '" data-aksi="setuju">Setujui</button><button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="tolak">Tolak</button></div>'; }).join('') : '<p class="kosong">Tidak ada lapak yang menunggu.</p>';
+  document.getElementById('lapak').innerHTML = d.lapak.length ? d.lapak.map(function (x, i) {
+    return '<div class="kartu"><div class="isi"><b>' + esc(x.usaha) + '</b><small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + (i >= 12 ? ' · tidak tampil (hanya 12 terbaru)' : '') + '</small></div>'
+      + '<button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="hapus">Hapus</button></div>'; }).join('') : '<p class="kosong">Belum ada lapak.</p>';
+}
+function muat() { api('/admin/api/data').then(tampil).catch(function (e) { document.getElementById('masuk').hidden = false; document.getElementById('isi').hidden = true; document.getElementById('salah').textContent = e.message; }); }
+document.getElementById('masuk').addEventListener('submit', function (e) { e.preventDefault(); kunci = document.getElementById('kunci').value.trim(); try { sessionStorage.setItem('kunciAdmin', kunci); } catch (er) {} muat(); });
+document.getElementById('muat').onclick = muat;
+document.addEventListener('click', function (e) {
+  var b = e.target.closest('[data-aksi]'); if (!b) return;
+  b.disabled = true;
+  api('/admin/api/aksi', { uid: b.dataset.uid, aksi: b.dataset.aksi }).then(muat).catch(function (er) { alert(er.message); b.disabled = false; });
+});
+if (kunci) muat();
+</script>
+</body>
+</html>

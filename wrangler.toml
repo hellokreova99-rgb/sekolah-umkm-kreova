@@ -1,0 +1,18 @@
+name = "sekolah-umkm-kreova"
+main = "src/worker.js"
+compatibility_date = "2025-09-01"
+
+# Kunci admin TIDAK ditulis di sini. Atur di dashboard Cloudflare:
+# Worker → Settings → Variables and Secrets → Add → Type: Secret, Name: ADMIN_KEY
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[[durable_objects.bindings]]
+name = "SEKOLAH"
+class_name = "Sekolah"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Sekolah"]
