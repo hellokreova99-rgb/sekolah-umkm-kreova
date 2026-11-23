@@ -8,7 +8,7 @@ var SEKOLAH = {
   hadiahTarget: 'Kelas pertama dibangun',
   link: {
     instagram: 'https://www.instagram.com/hey.kreova/',
-    tiktok: '',        // link TikTok KREOVA
+        tiktok: 'https://www.tiktok.com/@hey.kreova',
     grupFB: '',        // link Grup FB "Sekolah UMKM Kreova"
     episodeTerbaru: '' // link video episode terbaru
   },
