@@ -35,6 +35,10 @@
     <h2>Lapak menunggu persetujuan</h2><div id="antrian"></div>
     <h2>Lapak tampil di Pasar Murid</h2><div id="lapak"></div>
     <p><button class="netral" id="muat">Muat ulang</button></p>
+    <h2>Hapus semua data sekolah</h2>
+    <p class="kosong">Menghapus semua murid, nomor di Dinding Angkatan, absen, vote, dan lapak. Tidak bisa dibatalkan. Murid yang sudah daftar akan diminta daftar ulang.</p>
+    <p><label for="konfirmasi">Ketik <b>HAPUS SEMUA</b> untuk konfirmasi</label><br><input id="konfirmasi" autocomplete="off"> <button class="tolak" id="reset">Hapus semua data</button></p>
+    <div class="salah" id="info-reset" role="status"></div>
   </section>
 </main>
 <script>
@@ -60,6 +64,12 @@ function tampil(d) {
 function muat() { api('/admin/api/data').then(tampil).catch(function (e) { document.getElementById('masuk').hidden = false; document.getElementById('isi').hidden = true; document.getElementById('salah').textContent = e.message; }); }
 document.getElementById('masuk').addEventListener('submit', function (e) { e.preventDefault(); kunci = document.getElementById('kunci').value.trim(); try { sessionStorage.setItem('kunciAdmin', kunci); } catch (er) {} muat(); });
 document.getElementById('muat').onclick = muat;
+document.getElementById('reset').onclick = function () {
+  var k = document.getElementById('konfirmasi').value.trim(), info = document.getElementById('info-reset');
+  if (k !== 'HAPUS SEMUA') { info.textContent = 'Ketik HAPUS SEMUA persis (huruf besar) untuk konfirmasi.'; return; }
+  this.disabled = true; var t = this;
+  api('/admin/api/aksi', { aksi: 'resetSemua', konfirmasi: k }).then(function () { info.textContent = 'Semua data sudah dihapus. Sekolah kembali kosong.'; document.getElementById('konfirmasi').value = ''; t.disabled = false; muat(); }).catch(function (er) { info.textContent = er.message; t.disabled = false; });
+};
 document.addEventListener('click', function (e) {
   var b = e.target.closest('[data-aksi]'); if (!b) return;
   b.disabled = true;
