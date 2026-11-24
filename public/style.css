@@ -15,7 +15,7 @@
   .pill .dot { width:12px; height:12px; border-radius:50%; background:var(--kuning); }
   .pill.redup { background:#3A4470; }
   .gembok { position:absolute; right:8px; top:8px; width:34px; height:34px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; }
-  .buka-badge { position:absolute; left:50%; top:-26px; transform:translateX(-50%); background:var(--kuning); color:var(--navy); font-weight:800; font-size:18px; padding:4px 12px; border-radius:999px; white-space:nowrap; }
+  .buka-badge { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); background:var(--kuning); color:var(--navy); font-weight:800; font-size:14px; padding:4px 10px; border-radius:999px; white-space:nowrap; box-shadow:0 3px 0 var(--navy); z-index:2; }
 
   #naya { position:absolute; width:82px; height:151px; transform:translate(-50%,-100%); cursor:pointer; background:none; border:0; padding:0; }
   #naya > svg { width:100%; height:100%; display:block; }
