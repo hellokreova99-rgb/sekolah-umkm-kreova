@@ -162,7 +162,7 @@ function sambungServer(url) {
   function buka() {
     statusOnline(0, 'Menghubungkan…');
     try { ws = new WebSocket(url); } catch (e) { return ulang(); }
-    ws.onopen = function () { jeda = 1000; kirim({ t:'masuk', uid:uid, nama:saya.nama, jualan:saya.jualan, look:saya.look, x:Math.round(aku.tx), y:Math.round(aku.ty) }); };
+    ws.onopen = function () { jeda = 1000; kirim({ t:'masuk', uid:uid, nama:saya.nama, jualan:saya.jualan, look:saya.look, x:Math.round(aku.tx), y:Math.round(aku.ty), baru:baruDaftar }); };
     ws.onmessage = function (ev) { var m; try { m = JSON.parse(ev.data); } catch (e) { return; } if (m && typeof m === 'object') terima(m); };
     ws.onclose = function () { STATUS.online = false; ulang(); };
     ws.onerror = function () { try { ws.close(); } catch (e) {} };
@@ -192,6 +192,7 @@ function sambungServer(url) {
     else if (m.t === 'lapakSaya') { STATUS.lapakSaya = m.lapak; segarkanPanel(); if (m.lapak && m.lapak.status === 'menunggu') toast('Lapakmu dikirim, menunggu persetujuan'); if (m.lapak && m.lapak.status === 'tampil') toast('Lapakmu sudah tampil di Pasar Murid!'); }
     else if (m.t === 'hasilCari') { var el = document.getElementById('hasil-cari'); if (el) el.innerHTML = m.hasil.length ? '<div class="daftar-nama">' + m.hasil.map(barisNama).join('') + '</div>' : '<p class="catatan">Nama "' + esc(m.q) + '" belum ada di dinding.</p>'; }
     else if (m.t === 'dinding') { var dl = document.getElementById('daftar-dinding'); if (dl) { dl.insertAdjacentHTML('beforeend', m.isi.map(barisNama).join('')); var lb = document.getElementById('lebih-dinding'); if (lb) { if ((m.hal + 1) * 60 >= m.total) lb.remove(); else lb.dataset.hal = m.hal + 1; } } }
+    else if (m.t === 'reset') { try { localStorage.removeItem('kreova_murid'); } catch (e) {} location.reload(); }
     else if (m.t === 'galat') toast(m.teks);
     else if (m.t === 'penuh') statusOnline(0, 'Sekolah sedang penuh, coba lagi nanti');
   }
@@ -444,7 +445,7 @@ function toast(t) { var el = document.getElementById('toast'); el.textContent = 
 })();
 
 /* ================= Kartu murid ================= */
-var draf = { k:0, b:0, r:0, h:2 }, formDaftar = document.getElementById('form-daftar');
+var draf = { k:0, b:0, r:0, h:2 }, formDaftar = document.getElementById('form-daftar'), baruDaftar = false;
 function isiPilihan() {
   var pr = document.getElementById('pil-rambut'), pb = document.getElementById('pil-baju'), pk = document.getElementById('pil-kulit');
   pr.innerHTML = RAMBUT.map(function (n, i) { return '<button type="button" data-r="' + i + '" aria-pressed="' + (draf.r === i) + '">' + n + '</button>'; }).join('');
@@ -474,7 +475,7 @@ formDaftar.addEventListener('submit', function (e) {
   simpanLokal('kreova_murid', saya);
   document.getElementById('daftar').classList.remove('on');
   if (aku) { aku.nama = nama; aku.jualan = jualan; aku.look = saya.look; aku.el.querySelector('.tubuh').outerHTML = avatarSVG(saya.look); tulisTag(aku); if (jaringan.ubah) jaringan.ubah(); }
-  else masukSekolah();
+  else { baruDaftar = true; masukSekolah(); }
 });
 
 /* ================= Mulai ================= */
