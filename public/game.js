@@ -13,7 +13,7 @@ var SEKOLAH = {
     episodeTerbaru: '' // link video episode terbaru
   },
   pengumuman: [
-    { tanggal: '1 Des 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
+    { tanggal: '24 Nov 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
     { tanggal: 'Setiap hari', judul: 'Absen', isi: 'Tekan tombol Absen. Absen beruntun terlihat di kartumu.' },
     { tanggal: 'Setiap minggu', judul: 'Kotak Usulan', isi: 'Pilihan terbanyak minggu ini jadi pelajaran berikutnya.' }
   ],
