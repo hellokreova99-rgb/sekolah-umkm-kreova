@@ -102,6 +102,7 @@ export class Sekolah extends DurableObject {
       const look = bersihkanLook(m.look);
       const pos = koordinat(m.x, m.y) || { x: 300, y: 2470 };
       let p = await this.ctx.storage.get("u:" + uid);
+      if (!p && m.baru !== true) { this.kirim(ws, { t: "reset" }); return; }
       if (!p) {
         this.total += 1;
         p = { nama, jualan, look, no: this.total, tglDaftar: hariIni(), absen: null, vote: null, lapak: null };
@@ -228,6 +229,12 @@ export class Sekolah extends DurableObject {
         this.antrian = this.antrian.filter(x => x.uid !== uid);
         if (aksi === "setuju") { this.lapak = this.lapak.filter(x => x.uid !== uid); this.lapak.unshift({ uid, nama: item.nama, usaha: item.usaha, kategori: item.kategori, tgl: hariIni() }); }
         if (p) p.lapak = { status: aksi === "setuju" ? "tampil" : "ditolak", usaha: item.usaha, kategori: item.kategori };
+      } else if (aksi === "resetSemua") {
+        if (b.konfirmasi !== "HAPUS SEMUA") return json({ galat: "Ketik HAPUS SEMUA untuk konfirmasi." }, 400);
+        await this.ctx.storage.deleteAll();
+        this.total = 0; this.dinding = []; this.lapak = []; this.antrian = [];
+        for (const ws of this.ctx.getWebSockets()) { this.kirim(ws, { t: "reset" }); try { ws.close(4000, "reset"); } catch (e) {} }
+        return json({ ok: true, reset: true });
       } else if (aksi === "hapus") {
         this.lapak = this.lapak.filter(x => x.uid !== uid);
         if (p && p.lapak) p.lapak.status = "dihapus";
