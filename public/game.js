@@ -10,7 +10,7 @@ var SEKOLAH = {
     instagram: 'https://www.instagram.com/hey.kreova/',
         tiktok: 'https://www.tiktok.com/@hey.kreova',
     grupFB: '',        // link Grup FB "Sekolah UMKM Kreova"
-    episodeTerbaru: '' // link video episode terbaru
+    episodeTerbaru: 'https://www.instagram.com/reel/DgJ_rb4h1Ir/' // link video episode terbaru
   },
   pengumuman: [
     { tanggal: '24 Nov 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
@@ -24,7 +24,7 @@ var SEKOLAH = {
     { no:'03', judul:'Harga Tanpa Banting', status:'segera', masalah:'Saat sepi, refleksnya banting harga. Laba habis, pembeli hanya datang saat diskon.', episode:'', pr:'' },
     { no:'04', judul:'Bikin Pembeli Balik Lagi', status:'segera', masalah:'Pembeli hanya sekali beli. Tidak ada catatan pelanggan dan tawaran pembelian kedua.', episode:'', pr:'' },
     { no:'05', judul:'Jualan Pakai Sistem', status:'segera', masalah:'Semua dikerjakan sendiri tanpa SOP, sampai kelelahan dan bisnis sulit tumbuh.', episode:'', pr:'' },
-    { no:'06', judul:'Usulan Murid', status:'segera', masalah:'Kavling ini disimpan untuk pelajaran yang diusulkan murid di luar lima masalah utama.', episode:'', pr:'' }
+    { no:'06', judul:'Mulai dari Nol', status:'segera', masalah:'Usulan Bu Indah dari Surabaya: bingung mau jualan apa dan bagaimana cara memulai usaha. Kelas ini untuk yang benar-benar mulai dari nol.', episode:'', pr:'' }
   ],
   koperasi: { buka:false },
   kasKelas: { buka:false, gambarQRIS:'' },
