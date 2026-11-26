@@ -94,7 +94,7 @@ function terbang(wx, wy, s, ms, selesai) {
     if (k < 1) anim = requestAnimationFrame(step); else if (selesai) selesai(); }
   anim = requestAnimationFrame(step);
 }
-function skalaAwal() { return Math.max(minS(), Math.min(innerWidth / 760, 1.2)); }
+function skalaAwal() { return Math.max(minS(), Math.min(innerWidth / 860, 1.2)); }
 
 /* ================= Murid ================= */
 var lapisan = document.getElementById('lapisan-murid');
@@ -105,7 +105,7 @@ function buatMurid(id, data, punyaSaya) {
   el.innerHTML = avatarSVG(data.look) + '<span class="tag"></span><span class="bubble"></span>';
   if (!punyaSaya) { el.dataset.murid = id; el.setAttribute('role', 'button'); }
   lapisan.appendChild(el);
-  var x = data.x == null ? 300 : data.x, y = data.y == null ? 2470 : data.y;
+  var x = data.x == null ? 430 : data.x, y = data.y == null ? 2520 : data.y;
   var m = { el:el, bubble:el.querySelector('.bubble'), x:x, y:y, tx:x, ty:y, nama:data.nama || 'Murid', jualan:data.jualan || '', look:data.look || {}, beruntun:data.beruntun || 0, saya:punyaSaya, tBubble:null };
   tulisTag(m); taruh(m); murid[id] = m; return m;
 }
@@ -270,12 +270,12 @@ addEventListener('pointerup', lepas); addEventListener('pointercancel', lepas);
 vp.addEventListener('wheel', function (e) { e.preventDefault(); zoomDi(Math.exp(-e.deltaY * 0.0015), e.clientX, e.clientY); }, { passive:false });
 document.getElementById('zin').onclick = function () { zoomDi(1.3, innerWidth / 2, innerHeight / 2); };
 document.getElementById('zout').onclick = function () { zoomDi(1 / 1.3, innerWidth / 2, innerHeight / 2); };
-document.getElementById('home').onclick = function () { terbang(aku ? aku.x : 340, aku ? aku.y - 60 : 2330, skalaAwal(), 700); };
+document.getElementById('home').onclick = function () { terbang(aku ? aku.x : 430, aku ? aku.y - 60 : 2400, skalaAwal(), 700); };
 addEventListener('resize', render);
 
 /* ================= Titik peta ================= */
-var TITIK = { gerbang:[340,2330], pengumuman:[150,2250], usulan:[612,2250], kaskelas:[398,2545], koperasi:[470,2700], dinding:[692,1985], pasar:[142,1540], naya:[290,2430] };
-var kelasPos = [[202,1860],[347,1860],[492,1860],[202,2050],[347,2050],[492,2050]];
+var TITIK = { gerbang:[430,2530], pengumuman:[170,2210], usulan:[690,2205], kaskelas:[180,2735], koperasi:[690,2775], dinding:[745,1985], pasar:[142,1540], naya:[375,2585] };
+var kelasPos = [[205,1770],[370,1770],[535,1770],[205,1960],[370,1960],[535,1960]];
 var LAPAK_POS = [[70,1250],[142,1250],[214,1250],[70,1340],[142,1340],[214,1340],[70,1430],[142,1430],[214,1430],[70,1520],[142,1520],[214,1520]];
 /* Gedung kelas yang sudah dibangun (menutupi kavling kosong) */
 function GEDUNG_KELAS(no) { return '<svg viewBox="0 -14 126 136" style="position:absolute;left:0;top:-14px;width:126px;height:136px;pointer-events:none;overflow:visible" aria-hidden="true"><rect x="-1" y="-1" width="128" height="124" rx="11" fill="#D9B07A" stroke="#F1DDB5" stroke-width="5"/><ellipse cx="63" cy="114" rx="60" ry="7" fill="#000" opacity=".16"/><rect x="2" y="104" width="122" height="12" rx="4" fill="#B98A57"/><rect x="14" y="50" width="98" height="58" fill="#F4E6CC"/><rect x="14" y="98" width="98" height="10" fill="#E3CFA8"/><path d="M4 54L63 12L122 54Z" fill="#14204F"/><path d="M4 54H122L115 61H11Z" fill="#F5C518"/><rect x="61" y="0" width="3" height="16" fill="#0C1538"/><path d="M64 1H80L76 6L80 11H64Z" fill="#F5C518"/><rect x="45" y="28" width="36" height="18" rx="4" fill="#F5C518"/><text x="63" y="42" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="13" fill="#14204F">' + no + '</text><rect x="21" y="66" width="24" height="20" rx="2" fill="#A9D8F2" stroke="#14204F" stroke-width="2.5"/><path d="M33 66V86M21 76H45" stroke="#14204F" stroke-width="2"/><rect x="81" y="66" width="24" height="20" rx="2" fill="#A9D8F2" stroke="#14204F" stroke-width="2.5"/><path d="M93 66V86M81 76H105" stroke="#14204F" stroke-width="2"/><rect x="52" y="70" width="22" height="38" rx="2" fill="#A86E3E"/><circle cx="69" cy="90" r="2" fill="#F5C518"/></svg>'; }
@@ -486,13 +486,13 @@ formDaftar.addEventListener('submit', function (e) {
 
 /* ================= Mulai ================= */
 function masukSekolah() {
-  aku = buatMurid('saya', { nama:saya.nama, jualan:saya.jualan, look:saya.look, x:220, y:2860 }, true);
+  aku = buatMurid('saya', { nama:saya.nama, jualan:saya.jualan, look:saya.look, x:430, y:2860 }, true);
   mulaiJaringan();
-  terbang(330, 2560, skalaAwal(), 1600, function () { jalanKe(300, 2470, sapaNaya); });
+  terbang(470, 2420, skalaAwal(), 1600, function () { jalanKe(TITIK.naya[0], TITIK.naya[1], sapaNaya); });
 }
 (function mulai() {
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', mulai); return; }
-  lihat(540, 2400, skalaAwal());
+  lihat(470, 2300, skalaAwal());
   requestAnimationFrame(loop);
   setTimeout(function () {
     var l = document.getElementById('loading'); if (l) { l.style.opacity = 0; setTimeout(function () { if (l.parentNode) l.parentNode.removeChild(l); }, 600); }
