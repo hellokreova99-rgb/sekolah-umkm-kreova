@@ -10,7 +10,7 @@ var SEKOLAH = {
     instagram: 'https://www.instagram.com/hey.kreova/',
         tiktok: 'https://www.tiktok.com/@hey.kreova',
     grupFB: '',        // link Grup FB "Sekolah UMKM Kreova"
-    episodeTerbaru: 'https://www.instagram.com/reel/DgJ_rb4h1Ir/' // link video episode terbaru
+    episodeTerbaru: 'https://www.instagram.com/reel/DgMMINgz3hk/' // link video episode terbaru
   },
   pengumuman: [
     { tanggal: '26 Nov 2026', judul: 'Hasil vote: Untung Bocor menang', isi: '8 dari 12 suara memilih Untung bocor. Kelas 01 "Untung Bocor" resmi dibuka. Kotak Usulan putaran 2 sudah dibuka: pilih kelas berikutnya.' },
@@ -20,7 +20,7 @@ var SEKOLAH = {
   ],
   // status: 'segera' (terkunci) | 'buka'
   kelas: [
-    { no:'01', judul:'Untung Bocor', status:'buka', masalah:'Jualan laku, tapi uangnya entah ke mana: uang usaha campur uang dapur, harga cuma dihitung dari bahan, dan pengeluaran kecil tidak pernah dicatat.', episode:'', pr:'Tulis di komentar video Kelas 01: satu pengeluaran usaha yang paling sering lupa kamu catat. Tantangan 7 hari: pisahkan uang usaha ke satu kantong khusus.',
+    { no:'01', judul:'Untung Bocor', status:'buka', masalah:'Jualan laku, tapi uangnya entah ke mana: uang usaha campur uang dapur, harga cuma dihitung dari bahan, dan pengeluaran kecil tidak pernah dicatat.', episode:'https://www.instagram.com/reel/DgMMINgz3hk/', pr:'Tulis di komentar video Kelas 01: satu pengeluaran usaha yang paling sering lupa kamu catat. Tantangan 7 hari: pisahkan uang usaha ke satu kantong khusus.',
       ringkas:['Lubang 1: uang usaha dan uang dapur satu dompet, jadi laba dan modal tidak kelihatan.','Lubang 2: harga hanya dari bahan. Kemasan, admin marketplace, ongkir, dan iklan ikut menggerus untung.','Bukan karena malas: otak kita suka mencampur kantong uang dan menghindari catatan saat sepi. Butuh sistem, bukan niat.','Tambalan pertama: pisahkan kantong. Satu untuk usaha, satu untuk pribadi.'] },
     { no:'02', judul:'Seni Balas Chat', status:'segera', masalah:'Pembeli tanya harga lalu menghilang: balasan kaku, panik saat ditawar, follow-up yang terdengar menagih.', episode:'', pr:'' },
     { no:'03', judul:'Harga Tanpa Banting', status:'segera', masalah:'Saat sepi, refleksnya banting harga. Laba habis, pembeli hanya datang saat diskon.', episode:'', pr:'' },
