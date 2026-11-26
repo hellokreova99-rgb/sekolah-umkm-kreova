@@ -27,9 +27,9 @@ function buatPeta() {
   for (var x = -20; x < W + 40; x += 34) o.push('<circle cx="' + x + '" cy="' + (652 + ri(-6, 6)) + '" r="' + ri(16, 24) + '" fill="#4E9A49"/>');
   o.push('<rect y="940" width="1080" height="1940" fill="#78C25A"/>');
   for (i = 0; i < 90; i++) o.push('<ellipse cx="' + ri(0, W) + '" cy="' + ri(960, H) + '" rx="' + ri(40, 120) + '" ry="' + ri(14, 34) + '" fill="' + pilih(['#6EB651', '#84CB63']) + '" opacity=".7"/>');
-  // sungai (belum ada jembatan)
-  var tengah = catmull([[600, 650], [660, 820], [720, 1000], [600, 1260], [640, 1500], [820, 1760], [880, 2050], [760, 2400], [820, 2700], [880, 2900]], 30);
-  function lebar(y) { return 26 + Math.max(0, y - 650) / 2250 * 190; }
+  // sungai di tepi kanan (lahan sekolah jadi lega)
+  var tengah = catmull([[700, 650], [780, 820], [880, 1000], [960, 1250], [990, 1600], [996, 2000], [986, 2400], [1000, 2900]], 30);
+  function lebar(y) { return 26 + Math.max(0, y - 650) / 2250 * 110; }
   var kiri = [], kanan = [];
   tengah.forEach(function (p, i) {
     var a = tengah[Math.max(i - 1, 0)], b = tengah[Math.min(i + 1, tengah.length - 1)], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1, nx = -dy / L, ny = dx / L, w = lebar(p[1]) / 2;
@@ -39,54 +39,38 @@ function buatPeta() {
   o.push('<path d="' + poly + '" fill="#5E9C4A" stroke="#5E9C4A" stroke-width="22" stroke-linejoin="round"/><path d="' + poly + '" fill="#5BB4D6"/>');
   for (i = 10; i < tengah.length - 10; i += 9) { var p = tengah[i], w = lebar(p[1]); [-0.22, 0.18].forEach(function (f) { o.push('<path d="M' + Math.round(p[0] + f * w) + ' ' + Math.round(p[1]) + 'l' + ri(-6, 6) + ' ' + Math.round(18 + w * .12) + '" stroke="#9AD6EC" stroke-width="' + (3 + w * .02).toFixed(1) + '" stroke-linecap="round"/>'); }); }
   function sungaiX(yq) { var best = tengah[0]; tengah.forEach(function (p) { if (Math.abs(p[1] - yq) < Math.abs(best[1] - yq)) best = p; }); return best[0]; }
-  var sx = sungaiX(1500), sw = lebar(1500);
-  for (i = 0; i < 6; i++) { var bx = Math.round(sx - sw / 2 + (i + .5) / 6 * sw), by = 1500 + (i % 2) * 8; o.push('<ellipse cx="' + bx + '" cy="' + (by + 4) + '" rx="15" ry="8" fill="#7E8794"/><ellipse cx="' + bx + '" cy="' + by + '" rx="15" ry="8" fill="#A7B0BC"/>'); }
-  // jalan tanah
+  // jalan tanah: gerbang -> halaman depan, lapangan -> Pasar Murid
   function tanah(pts, w) { var s = d(catmull(pts, 20)); o.push('<path d="' + s + '" stroke="#B5854F" stroke-width="' + (w + 10) + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="' + s + '" stroke="#D2A46D" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'); }
-  tanah([[150, 2900], [240, 2640], [330, 2420], [340, 2250]], 74);
-  tanah([[330, 1660], [360, 1560], [440, 1500], [560, 1500]], 46);
-  tanah([[760, 1500], [880, 1440], [960, 1300], [1100, 1240]], 46);
-  tanah([[330, 1660], [260, 1400], [300, 1200], [430, 1060], [560, 960]], 50);
-  tanah([[240, 2640], [60, 2560], [-40, 2520]], 44);
-  tanah([[430, 1060], [250, 1000], [-40, 980]], 38);
+  tanah([[430, 2900], [430, 2620], [430, 2400], [430, 2300]], 96);
+  tanah([[400, 1600], [360, 1470], [300, 1380], [250, 1350]], 56);
   // alas Pasar Murid
   o.push('<rect x="26" y="1186" width="232" height="340" rx="26" fill="#C9A06B"/><rect x="30" y="1180" width="224" height="340" rx="24" fill="#D8B47F"/>');
-  // lahan sekolah
-  var FX = 330, FY = 1960;
-  o.push('<ellipse cx="' + FX + '" cy="' + (FY + 14) + '" rx="318" ry="300" fill="#B5854F"/><ellipse cx="' + FX + '" cy="' + FY + '" rx="312" ry="294" fill="#D8AE79"/>');
-  for (i = 0; i < 60; i++) { var a = rnd() * 6.283, r = Math.sqrt(rnd()); o.push('<ellipse cx="' + Math.round(FX + Math.cos(a) * r * 280) + '" cy="' + Math.round(FY + Math.sin(a) * r * 260) + '" rx="' + ri(4, 9) + '" ry="3" fill="#C49663"/>'); }
+  // lapangan sekolah (persegi lebar)
+  var LX = 60, LY = 1590, LW = 840, LH = 720;
+  o.push('<rect x="' + LX + '" y="' + (LY + 14) + '" width="' + LW + '" height="' + LH + '" rx="64" fill="#B5854F"/><rect x="' + LX + '" y="' + LY + '" width="' + LW + '" height="' + LH + '" rx="64" fill="#D8AE79"/>');
+  o.push('<rect x="' + (LX + 22) + '" y="' + (LY + 22) + '" width="' + (LW - 44) + '" height="' + (LH - 44) + '" rx="46" fill="none" stroke="#E6C495" stroke-width="5" stroke-dasharray="2 16" stroke-linecap="round"/>');
+  for (i = 0; i < 70; i++) o.push('<ellipse cx="' + ri(LX + 40, LX + LW - 40) + '" cy="' + ri(LY + 40, LY + LH - 40) + '" rx="' + ri(4, 9) + '" ry="3" fill="#C49663"/>');
+  // kavling kelas: 2 baris x 3, jarak lega
   var n = 1;
-  [1800, 1990].forEach(function (py) { [140, 285, 430].forEach(function (px) {
-    var cx = px + 62, cy = py + 58;
-    o.push('<rect x="' + px + '" y="' + py + '" width="125" height="120" rx="10" fill="#CFA26C" stroke="#FFF6E2" stroke-width="4" stroke-dasharray="14 10"/><rect x="' + (cx - 3) + '" y="' + (cy - 6) + '" width="6" height="46" fill="#8A5A34"/><rect x="' + (cx - 30) + '" y="' + (cy - 38) + '" width="60" height="38" rx="6" fill="#14204F"/><text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="20" fill="#F5C518">0' + (n++) + '</text>');
+  [1770, 1960].forEach(function (cy0) { [205, 370, 535].forEach(function (cx0) {
+    var px = cx0 - 63, py = cy0 - 60, cx = cx0, cy = cy0;
+    o.push('<rect x="' + px + '" y="' + py + '" width="126" height="120" rx="10" fill="#CFA26C" stroke="#FFF6E2" stroke-width="4" stroke-dasharray="14 10"/><rect x="' + (cx - 3) + '" y="' + (cy - 4) + '" width="6" height="46" fill="#8A5A34"/><rect x="' + (cx - 30) + '" y="' + (cy - 36) + '" width="60" height="38" rx="6" fill="#14204F"/><text x="' + cx + '" y="' + (cy - 10) + '" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="20" fill="#F5C518">0' + (n++) + '</text>');
   }); });
-  o.push('<ellipse cx="330" cy="1748" rx="26" ry="8" fill="#B5854F"/><rect x="326" y="1600" width="8" height="150" rx="3" fill="#E9ECF2"/><circle cx="330" cy="1598" r="7" fill="#F5C518"/><rect x="334" y="1606" width="64" height="22" fill="#D83A34"/><rect x="334" y="1628" width="64" height="22" fill="#fff"/>');
-  o.push('<g transform="translate(470 1650)"><rect x="-4" y="40" width="8" height="60" fill="#8A5A34"/><rect x="76" y="40" width="8" height="60" fill="#8A5A34"/><rect x="-12" y="-10" width="104" height="66" rx="5" fill="#C9A77A"/><rect x="-6" y="-4" width="92" height="54" rx="3" fill="#14204F"/><path d="M6 12H46M6 26H70" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".6"/><rect x="58" y="38" width="18" height="5" rx="2" fill="#F5C518"/></g>');
-  o.push('<g transform="translate(470 1770)"><rect width="90" height="14" rx="4" fill="#A86E3E"/><rect x="8" y="14" width="7" height="18" fill="#8A5A34"/><rect x="75" y="14" width="7" height="18" fill="#8A5A34"/></g>');
-  o.push('<g transform="translate(150 1700)"><rect x="-3" width="6" height="70" fill="#8A5A34"/><rect x="-22" y="-4" width="44" height="7" rx="3" fill="#8A5A34"/><path d="M0 4C-12 4-14 14-14 24L-17 34H17L14 24C14 14 12 4 0 4Z" fill="#F5C518"/><circle cy="38" r="4" fill="#14204F"/></g>');
-  o.push('<g transform="translate(340 2290)"><rect x="-180" y="-10" width="16" height="120" rx="4" fill="#0C1538"/><rect x="164" y="-10" width="16" height="120" rx="4" fill="#0C1538"/><rect x="-200" y="-80" width="400" height="86" rx="12" fill="#14204F"/><rect x="-200" y="-4" width="400" height="10" rx="4" fill="#F5C518"/><circle cx="-158" cy="-37" r="24" fill="#F5C518"/><text x="-158" y="-28" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="26" fill="#14204F">K</text><text x="-122" y="-46" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="27" fill="#fff">SEKOLAH UMKM</text><text x="-122" y="-16" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="27" fill="#F5C518">KREOVA</text></g>');
-  // rumah & warung warga
-  var RUMAH = [[150, 1080, .8, 'h'], [520, 1150, .85, 'w'], [820, 1130, .8, 'h'], [950, 1020, .7, 'h'], [330, 930, .6, 'h'], [720, 920, .6, 'w'], [960, 1620, 1, 'h'], [1010, 2150, 1.05, 'w'], [960, 2480, 1.1, 'h'], [80, 2380, 1.1, 'h'], [520, 2620, 1.15, 'w']];
-  RUMAH.forEach(function (h) {
-    var g = '<g transform="translate(' + h[0] + ' ' + h[1] + ') scale(' + h[2] + ')">';
-    if (h[3] === 'h') g += '<ellipse cy="62" rx="72" ry="12" opacity=".12"/><rect x="-56" width="112" height="62" fill="#F4E6CC"/><path d="M-70 4L0-46L70 4Z" fill="#C8553D"/><path d="M-70 4H70L64 12H-64Z" fill="#9E3F2E"/><rect x="-12" y="24" width="24" height="38" fill="#14204F"/><rect x="-46" y="22" width="24" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/><rect x="22" y="22" width="24" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/>';
-    else { g += '<ellipse cy="66" rx="70" ry="12" opacity=".12"/><rect x="-58" y="10" width="116" height="56" fill="#F4E6CC"/><rect x="-44" y="26" width="88" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/><rect x="-58" y="48" width="116" height="18" fill="#A86E3E"/>';
-      for (var j = 0; j < 8; j++) g += '<rect x="' + (-64 + j * 16) + '" y="-8" width="16" height="24" fill="' + (j % 2 ? '#F5C518' : '#14204F') + '"/>'; }
-    o.push(g + '</g>');
-  });
-  // pohon & pisang
+  // koperasi (warung bergaris navy-kuning)
+  (function () { var g = '<g transform="translate(690 2680) scale(1.15)"><ellipse cy="66" rx="70" ry="12" opacity=".12"/><rect x="-58" y="10" width="116" height="56" fill="#F4E6CC"/><rect x="-44" y="26" width="88" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/><rect x="-58" y="48" width="116" height="18" fill="#A86E3E"/>';
+    for (var j = 0; j < 8; j++) g += '<rect x="' + (-64 + j * 16) + '" y="-8" width="16" height="24" fill="' + (j % 2 ? '#F5C518' : '#14204F') + '"/>';
+    o.push(g + '</g>'); })();
+  // pohon & pisang (hanya pemandangan, tidak menutupi tempat penting)
   function terhalang(x, y) {
-    if (Math.pow(x - FX, 2) / 115600 + Math.pow(y - FY, 2) / 108900 < 1) return true;
-    if (Math.abs(x - sungaiX(y)) < lebar(y) / 2 + 60) return true;
-    if (y > 2200 && y < 2420 && x > 100 && x < 640) return true;
-    if (y > 1580 && y < 1820 && x > 420 && x < 640) return true;
-    if (y > 1180 && y < 1540 && x < 270) return true;
-    if (y > 1800 && y < 1990 && x > 600 && x < 790) return true;
-    for (var k = 0; k < RUMAH.length; k++) { var h = RUMAH[k]; if (Math.abs(x - h[0]) < 95 * h[2] && y - h[1] > -70 * h[2] && y - h[1] < 110 * h[2]) return true; }
+    if (x > LX - 50 && x < LX + LW + 40 && y > LY - 60 && y < LY + LH + 60) return true;   // lapangan
+    if (x > 90 && x < 800 && y > LY + LH && y < H) return true;                             // halaman depan
+    if (Math.abs(x - sungaiX(y)) < lebar(y) / 2 + 50) return true;                          // sungai
+    if (x < 300 && y > 1110 && y < 1580) return true;                                       // Pasar Murid
+    if (x > 200 && x < 460 && y > 1320 && y < 1600) return true;                            // jalan ke pasar
     return false;
   }
   var pos = [], coba = 0;
-  while (pos.length < 46 && coba++ < 4000) {
+  while (pos.length < 46 && coba++ < 6000) {
     var tx = ri(20, W - 20), ty = ri(980, H - 40);
     if (terhalang(tx, ty)) continue;
     if (pos.some(function (q) { return Math.pow(tx - q[0], 2) + Math.pow(ty - q[1], 2) < 9025; })) continue;
