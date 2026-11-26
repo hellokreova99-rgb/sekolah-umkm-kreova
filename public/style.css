@@ -79,6 +79,14 @@
   .kartu { background:#fff; border-radius:14px; padding:14px 16px; margin-bottom:10px; box-shadow:0 3px 0 rgba(12,21,56,.08); }
   .kartu b { color:var(--navy); }
   .kartu small { display:block; color:var(--abu); font-weight:600; margin-bottom:4px; }
+  .kartu.rak { display:flex; gap:12px; align-items:flex-start; }
+  .kartu.rak img { width:84px; height:84px; border-radius:10px; flex:none; object-fit:cover; background:var(--navy); }
+  .kartu.rak > div { flex:1; min-width:0; }
+  .rak-isi { font-size:13.5px; line-height:1.45; color:#2A3358; margin:4px 0 6px; }
+  .rak-harga { display:inline-block; font-weight:800; color:var(--navy); font-size:16px; margin-right:8px; }
+  .rak-harga.gratis { background:var(--kuning); padding:1px 10px; border-radius:20px; font-size:14px; }
+  .rak-nanti { font-size:12px; color:var(--abu); }
+  .tombol.kecil { min-height:40px; font-size:14px; margin-top:8px; }
   .opsi { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#fff; border:3px solid transparent; border-radius:14px; padding:12px 14px; margin-bottom:8px; font-size:15.5px; font-weight:700; color:var(--navy); cursor:pointer; box-shadow:0 3px 0 rgba(12,21,56,.08); }
   .opsi .no { width:36px; height:36px; flex:none; border-radius:10px; background:var(--navy); color:var(--kuning); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:17px; }
   .opsi[aria-pressed="true"] { border-color:var(--kuning); }
