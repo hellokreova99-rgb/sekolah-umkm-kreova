@@ -263,9 +263,44 @@ export class Sekolah extends DurableObject {
   }
 }
 
+/* Seller Tools: diambil dari file ZIP produk di Lynk, disajikan sebagai halaman web (bisa dibuka di HP). Ganti URL ini kalau file di Lynk diunggah ulang. */
+const ST_ZIP = "https://lynk.id/products/26-11-2026/file_1795634631966_1380692.zip";
+async function htmlDariZip(buf) {
+  const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength), dec = new TextDecoder();
+  let off = 0;
+  while (off + 30 <= buf.length && dv.getUint32(off, true) === 0x04034b50) {
+    const metode = dv.getUint16(off + 8, true), ukuran = dv.getUint32(off + 18, true);
+    const pNama = dv.getUint16(off + 26, true), pEkstra = dv.getUint16(off + 28, true);
+    const nama = dec.decode(buf.subarray(off + 30, off + 30 + pNama));
+    const awal = off + 30 + pNama + pEkstra, data = buf.subarray(awal, awal + ukuran);
+    if (nama.endsWith(".html")) {
+      if (metode === 0) return dec.decode(data);
+      const s = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return dec.decode(await new Response(s).arrayBuffer());
+    }
+    off = awal + ukuran;
+  }
+  return null;
+}
+function rapikanST(h) {
+  return h.replace(/data:image\/png;base64,[A-Za-z0-9+\/=]+/, "/lambang.svg")
+    .replace('<meta name="theme-color" content="#001850">', '<meta name="theme-color" content="#14204F">\n<meta name="apple-mobile-web-app-capable" content="yes">\n<meta name="apple-mobile-web-app-title" content="Seller Tools">\n<link rel="apple-touch-icon" href="/lambang.svg">')
+    .replace('Buka file ini dengan Google Chrome (Android) atau Safari (iPhone). Jika kamu menerima link, buka link lalu pilih menu browser → "Tambahkan ke layar utama" agar terasa seperti aplikasi.', 'Buka link Seller Tools dari Koperasi Sekolah di Chrome (Android) atau Safari (iPhone). Lalu pilih menu browser → "Tambahkan ke layar utama" supaya muncul seperti aplikasi. Data tetap tersimpan di HP-mu sendiri.');
+}
+async function sellerTools() {
+  const z = await fetch(ST_ZIP, { cf: { cacheTtl: 86400, cacheEverything: true } });
+  const gagal = () => new Response("Seller Tools sedang tidak bisa dimuat. Coba muat ulang sebentar lagi.", { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } });
+  if (!z.ok) return gagal();
+  const html = await htmlDariZip(new Uint8Array(await z.arrayBuffer()));
+  if (!html) return gagal();
+  return new Response(rapikanST(html), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=3600" } });
+}
+
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/seller-tools" || url.pathname === "/seller-tools/") return sellerTools();
     if (url.pathname === "/ws" || url.pathname.startsWith("/admin/api/")) {
       const stub = env.SEKOLAH.get(env.SEKOLAH.idFromName("sekolah-utama"));
       return stub.fetch(request);
