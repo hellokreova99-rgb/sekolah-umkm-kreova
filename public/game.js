@@ -274,7 +274,7 @@ document.getElementById('home').onclick = function () { terbang(aku ? aku.x : 43
 addEventListener('resize', render);
 
 /* ================= Titik peta ================= */
-var TITIK = { gerbang:[430,2530], pengumuman:[170,2210], usulan:[690,2205], kaskelas:[180,2735], koperasi:[690,2775], dinding:[745,1985], pasar:[142,1540], naya:[375,2585] };
+var TITIK = { gerbang:[430,2530], pengumuman:[170,2210], usulan:[690,2205], kaskelas:[180,2735], koperasi:[690,2775], dinding:[745,1985], pasar:[142,1540], naya:[455,2665] };
 var kelasPos = [[205,1770],[370,1770],[535,1770],[205,1960],[370,1960],[535,1960]];
 var LAPAK_POS = [[70,1250],[142,1250],[214,1250],[70,1340],[142,1340],[214,1340],[70,1430],[142,1430],[214,1430],[70,1520],[142,1520],[214,1520]];
 /* Gedung kelas yang sudah dibangun (menutupi kavling kosong) */
