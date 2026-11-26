@@ -5,7 +5,7 @@ document.getElementById('map').innerHTML = buatPeta();
    ========================================================= */
 var SEKOLAH = {
   targetMurid: 1000,
-  hadiahTarget: 'Kelas pertama dibangun',
+  hadiahTarget: 'Angkatan pertama lengkap',
   link: {
     instagram: 'https://www.instagram.com/hey.kreova/',
         tiktok: 'https://www.tiktok.com/@hey.kreova',
@@ -13,13 +13,15 @@ var SEKOLAH = {
     episodeTerbaru: 'https://www.instagram.com/reel/DgJ_rb4h1Ir/' // link video episode terbaru
   },
   pengumuman: [
+    { tanggal: '26 Nov 2026', judul: 'Hasil vote: Untung Bocor menang', isi: '8 dari 12 suara memilih Untung bocor. Kelas 01 "Untung Bocor" resmi dibuka. Kotak Usulan putaran 2 sudah dibuka: pilih kelas berikutnya.' },
     { tanggal: '24 Nov 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
     { tanggal: 'Setiap hari', judul: 'Absen', isi: 'Tekan tombol Absen. Absen beruntun terlihat di kartumu.' },
-    { tanggal: 'Setiap minggu', judul: 'Kotak Usulan', isi: 'Pilihan terbanyak minggu ini jadi pelajaran berikutnya.' }
+    { tanggal: 'Setiap putaran', judul: 'Kotak Usulan', isi: 'Pilihan terbanyak di setiap putaran jadi kelas berikutnya.' }
   ],
   // status: 'segera' (terkunci) | 'buka'
   kelas: [
-    { no:'01', judul:'Hitung Untung', status:'segera', masalah:'Omzet ramai tapi uang kas terus tergerus: biaya receh tak masuk HPP, kas usaha campur kas pribadi, potongan aplikasi lupa dihitung.', episode:'', pr:'' },
+    { no:'01', judul:'Untung Bocor', status:'buka', masalah:'Jualan laku, tapi uangnya entah ke mana: uang usaha campur uang dapur, harga cuma dihitung dari bahan, dan pengeluaran kecil tidak pernah dicatat.', episode:'', pr:'Tulis di komentar video Kelas 01: satu pengeluaran usaha yang paling sering lupa kamu catat. Tantangan 7 hari: pisahkan uang usaha ke satu kantong khusus.',
+      ringkas:['Lubang 1: uang usaha dan uang dapur satu dompet, jadi laba dan modal tidak kelihatan.','Lubang 2: harga hanya dari bahan. Kemasan, admin marketplace, ongkir, dan iklan ikut menggerus untung.','Bukan karena malas: otak kita suka mencampur kantong uang dan menghindari catatan saat sepi. Butuh sistem, bukan niat.','Tambalan pertama: pisahkan kantong. Satu untuk usaha, satu untuk pribadi.'] },
     { no:'02', judul:'Seni Balas Chat', status:'segera', masalah:'Pembeli tanya harga lalu menghilang: balasan kaku, panik saat ditawar, follow-up yang terdengar menagih.', episode:'', pr:'' },
     { no:'03', judul:'Harga Tanpa Banting', status:'segera', masalah:'Saat sepi, refleksnya banting harga. Laba habis, pembeli hanya datang saat diskon.', episode:'', pr:'' },
     { no:'04', judul:'Bikin Pembeli Balik Lagi', status:'segera', masalah:'Pembeli hanya sekali beli. Tidak ada catatan pelanggan dan tawaran pembelian kedua.', episode:'', pr:'' },
@@ -31,10 +33,12 @@ var SEKOLAH = {
   server: '' // kosongkan: otomatis memakai server di alamat situs yang sama (/ws)
 };
 /* HARUS sama dengan server (src/worker.js) */
-var FRASA = ['Halo, semua!','Salam kenal!','Jualan apa, kak?','Semangat jualan!','Ayo ke Kotak Usulan!','Mantap!','Terima kasih!','Sampai ketemu di kelas!'];
+var FRASA = ['Halo, semua!','Salam kenal!','Jualan apa, kak?','Semangat jualan!','Ayo ke Kotak Usulan!','Mantap!','Terima kasih!','Sampai ketemu di kelas!','Hadir, Bu Naya!'];
 var KATEGORI = ['Fashion','Makanan & Minuman','Kecantikan','Kerajinan','Rumah Tangga','Jasa','Produk Digital','Lainnya'];
-var PILIHAN = ['Untung bocor','Perang harga','Chat di-ghosting','Pembeli nggak balik','Capek ngurus sendiri'];
-var SAPAAN = ['Halo, murid baru!','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
+/* Putaran 2: pilihan ke-n = Kelas 0(n+1). HARUS sama jumlahnya dengan JUMLAH_PILIHAN di server. */
+var PILIHAN = ['Chat di-ghosting','Perang harga','Pembeli nggak balik','Capek ngurus sendiri','Mulai dari nol'];
+var PUTARAN = 2;
+var SAPAAN = ['Halo, murid-murid UMKM!','Kelas 01 Untung Bocor sudah dibuka!','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
 var KEPALA_NAYA = '<img src="/naya-kepala.svg" alt="">';
 
 /* ================= Avatar ================= */
@@ -336,12 +340,12 @@ var PANEL = {
       + tombolLink(SEKOLAH.link.episodeTerbaru, 'Tonton episode terbaru', 'utama');
   },
   usulan:function () {
-    var h = '<p class="p-label">KOTAK USULAN · MINGGU INI</p><h2 class="p-judul" id="p-judul">Mau belajar apa?</h2><p class="p-teks">Pilih masalah jualan yang paling bikin kamu pusing. Pilihan terbanyak minggu ini jadi pelajaran berikutnya. Kamu boleh ganti pilihan selama minggu berjalan.</p>';
+    var h = '<p class="p-label">KOTAK USULAN · PUTARAN ' + PUTARAN + '</p><h2 class="p-judul" id="p-judul">Kelas berikutnya apa?</h2><p class="p-teks">Putaran 1 dimenangkan <b>Untung bocor</b>, jadi Kelas 01 sudah dibuka. Sekarang pilih masalah yang paling bikin kamu pusing. Pilihan terbanyak jadi kelas berikutnya. Kamu boleh ganti pilihan selama putaran berjalan.</p>';
     h += PILIHAN.map(function (p, i) { return '<button class="opsi" data-pilih="' + (i + 1) + '" aria-pressed="' + (STATUS.vote === i + 1) + '"><span class="no">' + (i + 1) + '</span>' + p + '</button>'; }).join('');
     if (STATUS.voteHasil) {
       var total = STATUS.voteHasil.reduce(function (a, b) { return a + b; }, 0), maks = Math.max.apply(null, STATUS.voteHasil.concat([1]));
       h += '<p class="p-label" style="margin-top:14px">HASIL SEMENTARA · ' + angka(total) + ' SUARA</p><div class="hasil">' + STATUS.voteHasil.map(function (v, i) { return '<div class="baris"><span style="width:20px">' + (i + 1) + '</span><span class="bar"><i style="width:' + Math.round(v / maks * 100) + '%"></i></span><span class="n">' + angka(v) + '</span></div>'; }).join('') + '</div>';
-      h += '<p class="catatan">Satu perangkat satu suara per minggu. Suara dari komentar video juga ikut dihitung saat pengumuman.</p>';
+      h += '<p class="catatan">Satu perangkat satu suara per putaran. Suara dari komentar video juga ikut dihitung saat pengumuman.</p>';
     } else h += '<p class="catatan">Hasil suara tampil saat sekolah sudah online di servernya.</p>';
     return h;
   },
@@ -372,7 +376,7 @@ var PANEL = {
     : '<p class="p-label">POS KAS KELAS</p><span class="gembok-besar">' + GEMBOK + ' Belum dibuka</span><h2 class="p-judul" id="p-judul">Belum dibuka</h2><p class="p-teks">Pos ini baru dibuka setelah kelas-kelas pertama berjalan. Sekolah UMKM Kreova tetap gratis untuk semua murid.</p>'; },
   kelas:function (i) { var k = SEKOLAH.kelas[i], buka = k.status === 'buka';
     return '<p class="p-label">KELAS ' + k.no + (buka ? '' : ' · SEGERA DIBUKA') + '</p><h2 class="p-judul" id="p-judul">' + esc(k.judul) + '</h2><p class="p-teks"><b>Masalahnya:</b> ' + esc(k.masalah) + '</p>'
-      + (buka ? tombolLink(k.episode, 'Tonton pelajarannya', 'utama') + (k.pr ? '<div class="kartu" style="margin-top:14px"><small>PR minggu ini</small>' + esc(k.pr) + '</div>' : '')
+      + (buka ? (k.ringkas ? '<div class="kartu"><small>Ringkasan pelajaran</small><ol style="margin:6px 0 0;padding-left:20px">' + k.ringkas.map(function (r) { return '<li class="p-teks" style="margin:0 0 6px">' + esc(r) + '</li>'; }).join('') + '</ol></div>' : '') + tombolLink(k.episode, 'Tonton pelajarannya', 'utama') + (k.pr ? '<div class="kartu" style="margin-top:14px"><small>PR minggu ini</small>' + esc(k.pr) + '</div>' : '')
               : '<p class="p-teks">Kavling ini masih tanah kosong. Mau kelas ini dibuka duluan? Pilih di Kotak Usulan.</p><button class="tombol kuning" data-ke="usulan">Ke Kotak Usulan</button>'); },
   ngobrol:function () { return '<p class="p-label">OBROLAN CEPAT</p><h2 class="p-judul" id="p-judul">Mau bilang apa?</h2><div class="frasa">' + FRASA.map(function (f, i) { return '<button data-frasa="' + i + '">' + esc(f) + '</button>'; }).join('') + '</div><p class="catatan">Pesan muncul di atas kepalamu dan terlihat oleh murid lain.</p>'; }
 };
