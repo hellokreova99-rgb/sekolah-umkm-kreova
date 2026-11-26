@@ -4,9 +4,12 @@
 import { DurableObject } from "cloudflare:workers";
 
 // HARUS sama urutannya dengan FRASA di public/index.html
-const FRASA = ["Halo, semua!", "Salam kenal!", "Jualan apa, kak?", "Semangat jualan!", "Ayo ke Kotak Usulan!", "Mantap!", "Terima kasih!", "Sampai ketemu di kelas!"];
+const FRASA = ["Halo, semua!", "Salam kenal!", "Jualan apa, kak?", "Semangat jualan!", "Ayo ke Kotak Usulan!", "Mantap!", "Terima kasih!", "Sampai ketemu di kelas!", "Hadir, Bu Naya!"];
 const KATEGORI = ["Fashion", "Makanan & Minuman", "Kecantikan", "Kerajinan", "Rumah Tangga", "Jasa", "Produk Digital", "Lainnya"];
 const JUMLAH_PILIHAN = 5;
+// Putaran voting Kotak Usulan. Ganti teks ini untuk memulai putaran baru (hasil putaran lama tetap tersimpan).
+// Putaran 1 (vote:2026-11-23) dimenangkan "Untung bocor" -> Kelas 01.
+const VOTE_PUTARAN = "putaran-2";
 const MAKS_ONLINE = 150;
 const DINDING_MAKS = 1000;   // murid ke-1 s.d. ke-1000 = Angkatan Pertama
 const LAPAK_TAMPIL = 12;     // jumlah lapak di peta Pasar Murid
@@ -81,7 +84,7 @@ export class Sekolah extends DurableObject {
     const h = hariIni();
     return {
       no: p.no, absen: { beruntun: p.absen ? (p.absen.akhir === h || p.absen.akhir === kemarin() ? p.absen.beruntun : 0) : 0, jumlah: p.absen ? p.absen.jumlah : 0, sudahHariIni: !!(p.absen && p.absen.akhir === h) },
-      vote: p.vote && p.vote.minggu === mingguIni() ? p.vote.n : null,
+      vote: p.vote && p.vote.minggu === VOTE_PUTARAN ? p.vote.n : null,
       lapak: p.lapak ? { status: p.lapak.status, usaha: p.lapak.usaha, kategori: p.lapak.kategori } : null
     };
   }
@@ -117,7 +120,7 @@ export class Sekolah extends DurableObject {
       Object.assign(a, { masuk: true, uid, nama: p.nama, jualan, look, x: pos.x, y: pos.y, beruntun: st.absen.beruntun, tGerak: 0, tObrol: 0, tAksi: 0 });
       ws.serializeAttachment(a);
       const semua = this.terdaftar();
-      const minggu = mingguIni();
+      const minggu = VOTE_PUTARAN;
       this.kirim(ws, {
         t: "selamat", id: a.id, nama: p.nama, online: semua.length, total: this.total,
         murid: semua.map(s => this.dataPublik(s.deserializeAttachment())),
@@ -174,7 +177,7 @@ export class Sekolah extends DurableObject {
     } else if (m.t === "pilih") {
       const n = Number(m.n); if (!Number.isInteger(n) || n < 1 || n > JUMLAH_PILIHAN) return;
       const p = await this.ctx.storage.get(kunci); if (!p) return;
-      const minggu = mingguIni(); const hasil = await this.hasilVote(minggu);
+      const minggu = VOTE_PUTARAN; const hasil = await this.hasilVote(minggu);
       if (p.vote && p.vote.minggu === minggu) { if (p.vote.n === n) return this.kirim(ws, { t: "vote", minggu, hasil, pilihan: n }); hasil[p.vote.n - 1] = Math.max(0, hasil[p.vote.n - 1] - 1); }
       hasil[n - 1] += 1; p.vote = { minggu, n };
       await this.ctx.storage.put({ ["vote:" + minggu]: hasil, [kunci]: p });
@@ -218,7 +221,7 @@ export class Sekolah extends DurableObject {
     const kunci = request.headers.get("x-admin-key") || "";
     if (!samaAman(kunci, kunciAdmin)) return json({ galat: "Kunci admin salah." }, 401);
     if (url.pathname === "/admin/api/data" && request.method === "GET") {
-      return json({ total: this.total, online: this.terdaftar().length, antrian: this.antrian, lapak: this.lapak, minggu: mingguIni(), vote: await this.hasilVote(mingguIni()) });
+      return json({ total: this.total, online: this.terdaftar().length, antrian: this.antrian, lapak: this.lapak, minggu: VOTE_PUTARAN, vote: await this.hasilVote(VOTE_PUTARAN) });
     }
     if (url.pathname === "/admin/api/aksi" && request.method === "POST") {
       let b; try { b = await request.json(); } catch (e) { return json({ galat: "Data tidak valid." }, 400); }
