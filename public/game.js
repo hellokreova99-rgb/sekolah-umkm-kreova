@@ -13,6 +13,7 @@ var SEKOLAH = {
     episodeTerbaru: 'https://www.instagram.com/reel/DgMMINgz3hk/' // link video episode terbaru
   },
   pengumuman: [
+    { tanggal: '26 Nov 2026', judul: 'Koperasi Sekolah dibuka', isi: 'Buku paket pendamping pelajaran dan Seller Tools (gratis untuk murid) sudah ada di Koperasi, di kanan bawah dekat gerbang. Kelas tetap gratis.' },
     { tanggal: '26 Nov 2026', judul: 'Hasil vote: Untung Bocor menang', isi: '8 dari 12 suara memilih Untung bocor. Kelas 01 "Untung Bocor" resmi dibuka. Kotak Usulan putaran 2 sudah dibuka: pilih kelas berikutnya.' },
     { tanggal: '24 Nov 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
     { tanggal: 'Setiap hari', judul: 'Absen', isi: 'Tekan tombol Absen. Absen beruntun terlihat di kartumu.' },
@@ -28,7 +29,19 @@ var SEKOLAH = {
     { no:'05', judul:'Jualan Pakai Sistem', status:'segera', masalah:'Semua dikerjakan sendiri tanpa SOP, sampai kelelahan dan bisnis sulit tumbuh.', episode:'', pr:'' },
     { no:'06', judul:'Mulai dari Nol', status:'segera', masalah:'Usulan Bu Indah dari Surabaya: bingung mau jualan apa dan bagaimana cara memulai usaha. Kelas ini untuk yang benar-benar mulai dari nol.', episode:'', pr:'' }
   ],
-  koperasi: { buka:false },
+  koperasi: {
+    buka: true,
+    toko: 'https://lynk.id/heykreova',
+    catatanHarga: 'Harga murid angkatan pertama berlaku sampai 31 Des 2026.',
+    // urutan = urutan tampil. harga 0 = gratis. nanti = harga mulai 1 Jan 2027
+    rak: [
+      { nama:'Seller Tools', jenis:'Alat praktik · pendamping Kelas 01', harga:0, isi:'Hitung laba per pesanan, batas aman iklan, stok, dan catatan keuangan. Jalan di HP tanpa install.', link:'https://lynk.id/heykreova/o8p1re9gk1n3', cover:'https://cdn.lynkid.my.id/products/26-11-2026/1795681210975_9279730.webp' },
+      { nama:'Paket Chat Jualan (Jilid 1 + 2)', jenis:'Buku paket · pendamping Kelas 02', harga:29000, nanti:39000, isi:'Membaca pembeli + 30 script balasan chat. Lebih hemat Rp9.000.', link:'https://lynk.id/heykreova/z6pz2krloq7m', cover:'https://cdn.lynkid.my.id/products/26-11-2026/1795680987349_7065181.webp' },
+      { nama:'Jilid 1 · Membaca Pembeli', jenis:'Buku paket · Mapel Chat Jualan', harga:19000, nanti:25000, isi:'5 keraguan pembeli dan arti 10 kalimat chat yang paling sering masuk.', link:'https://lynk.id/heykreova/zvn65nr514ke', cover:'https://cdn.lynkid.my.id/products/26-11-2026/1795679922400_1419918.webp' },
+      { nama:'Jilid 2 · Script Balasan', jenis:'Buku paket · Mapel Chat Jualan', harga:19000, nanti:25000, isi:'30 balasan chat siap salin untuk 6 situasi, lengkap dengan alasannya.', link:'https://lynk.id/heykreova/v98wdkdm2ml7', cover:'https://cdn.lynkid.my.id/products/26-11-2026/1795679867525_6823774.webp' },
+      { nama:'Bisnis Fashion Online', jenis:'Buku paket · Edisi Reseller', harga:39000, nanti:49000, isi:'10 bab dari pilih produk, hitung HPP, sampai rencana aksi 30 hari.', link:'https://lynk.id/heykreova/dxon45kk6qdp', cover:'https://cdn.lynkid.my.id/products/26-11-2026/1795680146870_2265031.webp' }
+    ]
+  },
   kasKelas: { buka:false, gambarQRIS:'' },
   server: '' // kosongkan: otomatis memakai server di alamat situs yang sama (/ws)
 };
@@ -38,7 +51,7 @@ var KATEGORI = ['Fashion','Makanan & Minuman','Kecantikan','Kerajinan','Rumah Ta
 /* Putaran 2: pilihan ke-n = Kelas 0(n+1). HARUS sama jumlahnya dengan JUMLAH_PILIHAN di server. */
 var PILIHAN = ['Chat di-ghosting','Perang harga','Pembeli nggak balik','Capek ngurus sendiri','Mulai dari nol'];
 var PUTARAN = 2;
-var SAPAAN = ['Halo, murid-murid UMKM!','Kelas 01 Untung Bocor sudah dibuka!','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
+var SAPAAN = ['Halo, murid-murid UMKM!','Kelas 01 Untung Bocor sudah dibuka!','Koperasi sudah buka. Seller Tools gratis untuk murid!','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
 var KEPALA_NAYA = '<img src="/naya-kepala.svg" alt="">';
 
 /* ================= Avatar ================= */
@@ -372,13 +385,21 @@ var PANEL = {
   },
   lapakLain:function (i) { var l = STATUS.lapak[i]; if (!l) return PANEL.pasar();
     return '<p class="p-label">LAPAK MURID · ' + esc(l.kategori).toUpperCase() + '</p><h2 class="p-judul" id="p-judul">' + esc(l.usaha) + '</h2><p class="p-teks">Pemilik: <b>' + esc(l.nama) + '</b>. Sapa pemiliknya kalau ketemu di sekolah, atau cari di Grup FB murid.</p><button class="tombol putih" data-ke="pasar">Buka lapakku juga</button>'; },
-  koperasi:function () { return '<p class="p-label">KOPERASI SEKOLAH</p><span class="gembok-besar">' + GEMBOK + ' Masih terkunci</span><h2 class="p-judul" id="p-judul">Koperasi segera dibuka</h2><p class="p-teks">Di sini nanti tersedia buku paket untuk setiap pelajaran. Pintunya dibuka setelah kelas-kelas pertama berjalan.</p>'; },
+  koperasi:function () { var k = SEKOLAH.koperasi;
+    if (!k.buka) return '<p class="p-label">KOPERASI SEKOLAH</p><span class="gembok-besar">' + GEMBOK + ' Masih terkunci</span><h2 class="p-judul" id="p-judul">Koperasi segera dibuka</h2><p class="p-teks">Di sini nanti tersedia buku paket untuk setiap pelajaran.</p>';
+    function rp(n) { return n ? 'Rp' + angka(n) : 'Gratis'; }
+    return '<p class="p-label">KOPERASI SEKOLAH</p><h2 class="p-judul" id="p-judul">Buku paket &amp; alat praktik</h2>'
+      + '<p class="p-teks">Kelasnya tetap gratis. Koperasi untuk kamu yang ingin belajar lebih dalam dan langsung praktik.</p>'
+      + k.rak.map(function (b) { return '<div class="kartu rak"><img src="' + esc(b.cover) + '" alt="" loading="lazy"><div><small>' + esc(b.jenis) + '</small><b>' + esc(b.nama) + '</b>'
+        + '<p class="rak-isi">' + esc(b.isi) + '</p><span class="rak-harga' + (b.harga ? '' : ' gratis') + '">' + rp(b.harga) + '</span>' + (b.nanti ? '<span class="rak-nanti">mulai 1 Jan: ' + rp(b.nanti) + '</span>' : '')
+        + '<a class="tombol ' + (b.harga ? 'utama' : 'kuning') + ' kecil" href="' + esc(b.link) + '" target="_blank" rel="noopener">' + (b.harga ? 'Lihat buku' : 'Ambil gratis') + '</a></div></div>'; }).join('')
+      + '<p class="catatan">' + esc(k.catatanHarga) + ' Pembayaran dan unduhan lewat toko resmi KREOVA di Lynk.id.</p>' + tombolLink(k.toko, 'Buka semua di Lynk.id', 'putih'); },
   kaskelas:function () { return SEKOLAH.kasKelas.buka
     ? '<p class="p-label">POS KAS KELAS</p><h2 class="p-judul" id="p-judul">Dukung Sekolah UMKM Kreova</h2><p class="p-teks">Sekolah tetap gratis. Kas Kelas adalah dukungan sukarela untuk produksi konten. Nominal bebas, tidak ada minimal, tidak wajib.</p>' + (SEKOLAH.kasKelas.gambarQRIS ? '<img src="' + esc(SEKOLAH.kasKelas.gambarQRIS) + '" alt="QRIS Kas Kelas KREOVA" style="width:100%;border-radius:14px;background:#fff">' : '')
     : '<p class="p-label">POS KAS KELAS</p><span class="gembok-besar">' + GEMBOK + ' Belum dibuka</span><h2 class="p-judul" id="p-judul">Belum dibuka</h2><p class="p-teks">Pos ini baru dibuka setelah kelas-kelas pertama berjalan. Sekolah UMKM Kreova tetap gratis untuk semua murid.</p>'; },
   kelas:function (i) { var k = SEKOLAH.kelas[i], buka = k.status === 'buka';
     return '<p class="p-label">KELAS ' + k.no + (buka ? '' : ' · SEGERA DIBUKA') + '</p><h2 class="p-judul" id="p-judul">' + esc(k.judul) + '</h2><p class="p-teks"><b>Masalahnya:</b> ' + esc(k.masalah) + '</p>'
-      + (buka ? (k.ringkas ? '<div class="kartu"><small>Ringkasan pelajaran</small><ol style="margin:6px 0 0;padding-left:20px">' + k.ringkas.map(function (r) { return '<li class="p-teks" style="margin:0 0 6px">' + esc(r) + '</li>'; }).join('') + '</ol></div>' : '') + tombolLink(k.episode, 'Tonton pelajarannya', 'utama') + (k.pr ? '<div class="kartu" style="margin-top:14px"><small>PR minggu ini</small>' + esc(k.pr) + '</div>' : '')
+      + (buka ? (k.ringkas ? '<div class="kartu"><small>Ringkasan pelajaran</small><ol style="margin:6px 0 0;padding-left:20px">' + k.ringkas.map(function (r) { return '<li class="p-teks" style="margin:0 0 6px">' + esc(r) + '</li>'; }).join('') + '</ol></div>' : '') + tombolLink(k.episode, 'Tonton pelajarannya', 'utama') + (k.pr ? '<div class="kartu" style="margin-top:14px"><small>PR minggu ini</small>' + esc(k.pr) + '</div>' : '') + (k.no === '01' && SEKOLAH.koperasi.buka ? '<button class="tombol putih" data-ke="koperasi">Alat praktik gratis: Seller Tools di Koperasi</button>' : '')
               : '<p class="p-teks">Kavling ini masih tanah kosong. Mau kelas ini dibuka duluan? Pilih di Kotak Usulan.</p><button class="tombol kuning" data-ke="usulan">Ke Kotak Usulan</button>'); },
   ngobrol:function () { return '<p class="p-label">OBROLAN CEPAT</p><h2 class="p-judul" id="p-judul">Mau bilang apa?</h2><div class="frasa">' + FRASA.map(function (f, i) { return '<button data-frasa="' + i + '">' + esc(f) + '</button>'; }).join('') + '</div><p class="catatan">Pesan muncul di atas kepalamu dan terlihat oleh murid lain.</p>'; }
 };
