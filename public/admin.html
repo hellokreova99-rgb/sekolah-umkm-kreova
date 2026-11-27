@@ -18,12 +18,17 @@
   .angka { display:flex; gap:10px; flex-wrap:wrap; } .angka div { background:#14204F; color:#fff; border-radius:12px; padding:10px 14px; font-weight:700; }
   .salah { color:#B3261E; font-weight:700; min-height:20px; }
   .kosong { color:#5A6487; }
+  .foto { display:flex; gap:6px; flex-wrap:wrap; width:100%; } .foto figure { margin:0; width:96px; font-size:12px; } .foto img { width:96px; height:96px; object-fit:cover; border-radius:10px; display:block; background:#E8EEFB; }
+  .cek { background:#FFF3C4; border-radius:10px; padding:8px 10px; font-size:13.5px; width:100%; } .cek a { color:#14204F; font-weight:700; }
+  .tombol-baris { display:flex; gap:8px; flex-wrap:wrap; width:100%; align-items:center; } .tombol-baris input { flex:1 1 180px; min-height:40px; font-size:14px; }
+  .lencana { display:inline-block; background:#F5C518; color:#14204F; border-radius:999px; padding:2px 8px; font-size:12px; font-weight:800; margin-left:6px; }
+  .detail { font-size:14px; line-height:1.5; width:100%; } .detail div { margin:2px 0; } a { color:#14204F; }
 </style>
 </head>
 <body>
 <main>
   <h1>Admin Sekolah UMKM Kreova</h1>
-  <p class="kosong">Setujui lapak Pasar Murid dan pantau angka sekolah. Halaman ini hanya bekerja dengan kunci admin.</p>
+  <p class="kosong">Setujui lapak Pasar Sekolah, cek laporan, dan pantau angka sekolah. Halaman ini hanya bekerja dengan kunci admin.</p>
   <form id="masuk">
     <label for="kunci">Kunci admin (ADMIN_KEY)</label>
     <input id="kunci" type="password" autocomplete="current-password">
@@ -32,8 +37,9 @@
   </form>
   <section id="isi" hidden>
     <div class="angka" id="angka"></div>
+    <h2>Laporan dari pengunjung</h2><div id="laporan"></div>
     <h2>Lapak menunggu persetujuan</h2><div id="antrian"></div>
-    <h2>Lapak tampil di Pasar Murid</h2><div id="lapak"></div>
+    <h2>Lapak tampil di Pasar Sekolah</h2><p class="kosong">3 lapak dipajang di depan peta. Tandai "Pilihan" untuk memilihnya sendiri (maks. 3); sisanya dipilih otomatis dari yang paling lengkap (foto, deskripsi, cara pesan).</p><div id="lapak"></div>
     <p><button class="netral" id="muat">Muat ulang</button></p>
     <h2>Hapus semua data sekolah</h2>
     <p class="kosong">Menghapus semua murid, nomor di Dinding Angkatan, absen, vote, dan lapak. Tidak bisa dibatalkan. Murid yang sudah daftar akan diminta daftar ulang.</p>
@@ -50,16 +56,33 @@ function api(path, body) {
   return fetch(path, { method: body ? 'POST' : 'GET', headers: { 'x-admin-key': kunci, 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined })
     .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.galat || 'Gagal'); return d; }); });
 }
+function isiLapak(x) {
+  var h = '<div class="detail">';
+  if (x.deskripsi) h += '<div>' + esc(x.deskripsi) + '</div>';
+  if (x.izinWA && x.wa) h += '<div>WA: <a href="https://wa.me/' + esc(x.wa) + '" target="_blank" rel="noopener">+' + esc(x.wa) + '</a></div>';
+  if (x.link) h += '<div>Toko online: <a href="' + esc(x.link) + '" target="_blank" rel="noopener nofollow">' + esc(x.link) + '</a></div>';
+  if (x.legal) h += '<div>BPOM/PIRT/halal: ' + esc(x.legal) + '</div>';
+  h += '</div>';
+  if (x.produk && x.produk.length) h += '<div class="foto">' + x.produk.map(function (p) { return '<figure>' + (p.foto ? '<img src="/foto/' + esc(p.foto) + '.jpg" alt="">' : '') + '<figcaption>' + esc(p.nama || '') + (p.harga ? ' · ' + esc(p.harga) : '') + '</figcaption></figure>'; }).join('') + '</div>';
+  return h;
+}
 function tampil(d) {
   document.getElementById('isi').hidden = false; document.getElementById('masuk').hidden = true;
-  document.getElementById('angka').innerHTML = '<div>' + d.total + ' murid terdaftar</div><div>' + d.online + ' online</div>'
+  document.getElementById('angka').innerHTML = '<div>' + d.total + ' murid terdaftar</div><div>' + d.online + ' online</div><div>' + d.lapak.length + ' lapak tampil</div>'
     + '<div>Vote ' + esc(d.minggu) + '</div>' + d.vote.map(function (v, i) { return '<div>' + (i + 1) + '. ' + PILIHAN[i] + ': ' + v + '</div>'; }).join('');
+  document.getElementById('laporan').innerHTML = d.laporan.length ? d.laporan.map(function (x) {
+    return '<div class="kartu"><div class="isi"><b>' + esc(x.alasan) + '</b> · <a href="/lapak/' + esc(x.slug) + '" target="_blank" rel="noopener">' + esc(x.usaha) + '</a><small>' + esc(x.tgl) + (x.catatan ? ' · ' + esc(x.catatan) : '') + '</small></div><button class="netral" data-id="' + esc(x.id) + '" data-aksi="laporanSelesai">Selesai dicek</button></div>'; }).join('') : '<p class="kosong">Tidak ada laporan.</p>';
   document.getElementById('antrian').innerHTML = d.antrian.length ? d.antrian.map(function (x) {
-    return '<div class="kartu"><div class="isi"><b>' + esc(x.usaha) + '</b><small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + ' · ' + esc(x.tgl) + '</small></div>'
-      + '<button class="setuju" data-uid="' + esc(x.uid) + '" data-aksi="setuju">Setujui</button><button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="tolak">Tolak</button></div>'; }).join('') : '<p class="kosong">Tidak ada lapak yang menunggu.</p>';
-  document.getElementById('lapak').innerHTML = d.lapak.length ? d.lapak.map(function (x, i) {
-    return '<div class="kartu"><div class="isi"><b>' + esc(x.usaha) + '</b><small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + (i >= 12 ? ' · tidak tampil (hanya 12 terbaru)' : '') + '</small></div>'
-      + '<button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="hapus">Hapus</button></div>'; }).join('') : '<p class="kosong">Belum ada lapak.</p>';
+    var ig = x.ig ? '<a href="https://www.instagram.com/' + esc(x.ig) + '/" target="_blank" rel="noopener">@' + esc(x.ig) + '</a>' : '<b>belum isi IG</b>';
+    return '<div class="kartu"><div class="isi"><b>' + esc(x.usaha) + '</b>' + (x.perintis ? '<span class="lencana">Perintis</span>' : '') + (x.edit ? '<span class="lencana">Perubahan</span>' : '') + '<small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + ' · ' + esc(x.tgl) + (x.v === 3 ? ' · undangan sah: ' + (x.undanganSah || 0) : ' · format lama (tanpa isi)') + '</small></div>'
+      + '<div class="cek">Cek dulu: ' + ig + ' sudah <b>follow @hey.kreova</b> dan pernah komentar <b>"Hadir, Bu Naya"</b>? Foto asli, produk legal, link tidak mencurigakan?</div>'
+      + isiLapak(x)
+      + '<div class="tombol-baris"><button class="setuju" data-uid="' + esc(x.uid) + '" data-aksi="setuju">Setujui</button><input id="alasan-' + esc(x.uid) + '" placeholder="Alasan ditolak (terlihat oleh murid)"><button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="tolak">Tolak</button></div></div>'; }).join('') : '<p class="kosong">Tidak ada lapak yang menunggu.</p>';
+  document.getElementById('lapak').innerHTML = d.lapak.length ? d.lapak.map(function (x) {
+    var depan = d.pilihan.indexOf(x.slug) >= 0;
+    return '<div class="kartu"><div class="isi"><b><a href="/lapak/' + esc(x.slug) + '" target="_blank" rel="noopener">' + esc(x.usaha) + '</a></b>' + (x.perintis ? '<span class="lencana">Perintis</span>' : '') + (depan ? '<span class="lencana">Tampil di depan</span>' : '')
+      + '<small>' + esc(x.kategori) + ' · oleh ' + esc(x.nama) + (x.ig ? ' · @' + esc(x.ig) : '') + ' · dilihat ' + (x.dilihat || 0) + ' kali</small></div>' + isiLapak(x)
+      + '<div class="tombol-baris"><button class="netral" data-uid="' + esc(x.uid) + '" data-aksi="pin">' + (x.pin ? 'Lepas dari Pilihan' : 'Jadikan Pilihan') + '</button><input id="alasan-' + esc(x.uid) + '" placeholder="Alasan dihapus (terlihat oleh murid)"><button class="tolak" data-uid="' + esc(x.uid) + '" data-aksi="hapus">Hapus</button></div></div>'; }).join('') : '<p class="kosong">Belum ada lapak.</p>';
 }
 function muat() { api('/admin/api/data').then(tampil).catch(function (e) { document.getElementById('masuk').hidden = false; document.getElementById('isi').hidden = true; document.getElementById('salah').textContent = e.message; }); }
 document.getElementById('masuk').addEventListener('submit', function (e) { e.preventDefault(); kunci = document.getElementById('kunci').value.trim(); try { sessionStorage.setItem('kunciAdmin', kunci); } catch (er) {} muat(); });
@@ -73,8 +96,11 @@ document.getElementById('reset').onclick = function () {
 document.addEventListener('click', function (e) {
   var b = e.target.closest('[data-aksi]'); if (!b) return;
   b.disabled = true;
-  api('/admin/api/aksi', { uid: b.dataset.uid, aksi: b.dataset.aksi }).then(muat).catch(function (er) { alert(er.message); b.disabled = false; });
+  var al = b.dataset.uid ? document.getElementById('alasan-' + b.dataset.uid) : null;
+  if (b.dataset.aksi === 'hapus' && !confirmHapus(b)) { b.disabled = false; return; }
+  api('/admin/api/aksi', { uid: b.dataset.uid, id: b.dataset.id, aksi: b.dataset.aksi, alasan: al ? al.value : '' }).then(muat).catch(function (er) { alert(er.message); b.disabled = false; });
 });
+function confirmHapus(b) { if (b.dataset.yakin) return true; b.dataset.yakin = '1'; b.textContent = 'Yakin hapus? Ketuk lagi'; return false; }
 if (kunci) muat();
 </script>
 </body>
