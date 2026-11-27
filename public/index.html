@@ -52,7 +52,7 @@
         <rect x="-16" y="-66" width="28" height="22" rx="2" fill="#FFFFFF" transform="rotate(-12)"/>
       </g>
       <!-- pos kas kelas -->
-      <g transform="translate(180 2660)">
+      <g transform="translate(165 2575)">
         <ellipse cx="0" cy="56" rx="60" ry="10" fill="#000" opacity=".14"/>
         <rect x="-46" y="-6" width="92" height="62" fill="#F4E6CC"/><rect x="-34" y="10" width="68" height="22" fill="#FFFFFF" stroke="#6A4A2E" stroke-width="3"/>
         <path d="M-56 -4 L0 -44 L56 -4 Z" fill="#F5C518"/><path d="M-56 -4 L56 -4 L50 4 L-50 4 Z" fill="#C99E0A"/>
@@ -69,13 +69,13 @@
       </g>
     </svg>
 
-    <button class="spot" data-spot="gerbang" style="left:430px;top:2350px;width:470px;height:140px" aria-label="Gerbang sekolah"><span class="pill" style="top:186px;left:82%"><span class="dot"></span>Gerbang</span></button>
+    <button class="spot" data-spot="gerbang" style="left:430px;top:2350px;width:470px;height:140px" aria-label="Gerbang sekolah, follow dan absen"></button>
     <button class="spot" data-spot="pengumuman" style="left:170px;top:2110px;width:140px;height:150px" aria-label="Papan pengumuman"><span class="pill" style="top:150px">Pengumuman</span></button>
     <button class="spot" data-spot="usulan" style="left:690px;top:2110px;width:130px;height:150px" aria-label="Kotak usulan"><span class="pill" style="top:150px"><span class="dot"></span>Kotak Usulan</span></button>
-    <button class="spot" data-spot="kaskelas" style="left:180px;top:2660px;width:130px;height:120px" aria-label="Pos Kas Kelas"><span class="pill redup" style="top:124px">Kas Kelas</span></button>
-    <button class="spot" data-spot="koperasi" style="left:690px;top:2710px;width:170px;height:110px" aria-label="Koperasi sekolah, buku paket dan alat praktik"><span class="pill" style="top:116px"><span class="dot"></span>Koperasi · buka</span></button>
+    <button class="spot" data-spot="kaskelas" style="left:165px;top:2570px;width:130px;height:120px" aria-label="Pos Kas Kelas"><span class="pill redup" style="top:-58px">Kas Kelas</span></button>
+    <button class="spot" data-spot="koperasi" style="left:610px;top:2565px;width:180px;height:120px" aria-label="Koperasi sekolah, buku paket dan alat praktik gratis"><span class="pill kop" style="top:-64px"><span class="dot"></span>Koperasi Buku</span></button>
     <button class="spot" data-spot="dinding" style="left:745px;top:1860px;width:190px;height:170px" aria-label="Dinding Angkatan Pertama"><span class="pill" style="top:186px"><span class="dot"></span>Dinding Angkatan I</span></button>
-    <button class="spot" data-spot="pasar" style="left:142px;top:1150px;width:220px;height:50px" aria-label="Pasar Murid, buka lapakmu"><span class="pill" style="top:-6px"><span class="dot"></span>Pasar Murid</span></button>
+    <button class="spot" data-spot="pasar" style="left:142px;top:1150px;width:220px;height:50px" aria-label="Pasar Sekolah, lapak murid"><span class="pill" style="top:-6px"><span class="dot"></span>Pasar Sekolah</span></button>
     <div id="kelas-spots"></div>
     <div id="lapak-lapisan"></div>
     <div class="pill" style="left:370px;top:1640px;font-size:22px">Ruang Kelas · ketuk kavling</div>
@@ -118,6 +118,10 @@
     <input class="f" id="in-nama" maxlength="16" autocomplete="nickname" placeholder="Contoh: Rina">
     <label class="f" for="in-jualan">Kamu jualan apa?</label>
     <input class="f" id="in-jualan" maxlength="24" placeholder="Contoh: hijab, kue kering, skincare">
+    <label class="f" for="in-ig">Akun Instagram-mu</label>
+    <input class="f" id="in-ig" maxlength="40" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="@namaakunmu">
+    <label class="centang"><input type="checkbox" id="in-igsendiri"> Ini akun IG saya sendiri</label>
+    <p class="catatan" style="margin-top:4px">Tidak tampil di kartu murid. Dipakai untuk lapak di Pasar Sekolah dan saat Bu Naya menyebut murid di Instagram.</p>
     <p class="f" style="font-weight:800;font-size:13px;color:#14204F;margin:14px 0 6px">Gaya</p>
     <div class="pilihan" id="pil-rambut"></div>
     <p class="f" style="font-weight:800;font-size:13px;color:#14204F;margin:12px 0 6px">Warna baju</p>
