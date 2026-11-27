@@ -13,6 +13,7 @@ var SEKOLAH = {
     episodeTerbaru: 'https://www.instagram.com/reel/DgMMINgz3hk/' // link video episode terbaru
   },
   pengumuman: [
+    { tanggal: '27 Nov 2026', judul: 'Untuk 8 murid perintis', isi: 'Lapakmu sudah punya halaman sendiri, tapi isinya masih kosong. Buka Pasar Sekolah, tambahkan foto asli, deskripsi, dan nomor WA atau link toko. Lapak yang lengkap dipajang di depan dan bisa tampil di video Bu Naya.' },
     { tanggal: '27 Nov 2026', judul: 'Pasar Sekolah: lapak punya halaman sendiri', isi: 'Setiap lapak murid sekarang punya link sendiri berisi produk, foto asli, deskripsi, dan tombol pesan via WhatsApp atau toko online. Pasang link-nya di bio! Lahan lapak baru dibuka dengan mengajak 3 teman daftar lewat link undanganmu.' },
     { tanggal: '26 Nov 2026', judul: 'Koperasi Sekolah dibuka', isi: 'Buku paket pendamping pelajaran dan Seller Tools (gratis untuk murid) sudah ada di Koperasi, tepat di sebelah kanan gerbang. Kelas tetap gratis.' },
     { tanggal: '26 Nov 2026', judul: 'Hasil vote: Untung Bocor menang', isi: '8 dari 12 suara memilih Untung bocor. Kelas 01 "Untung Bocor" resmi dibuka. Kotak Usulan putaran 2 sudah dibuka: pilih kelas berikutnya.' },
@@ -203,7 +204,7 @@ function sambungServer(url) {
       if (STATUS.ig && !saya.ig) { saya.ig = STATUS.ig; simpanLokal('kreova_murid', saya); }
       var d = m.dunia || {}; STATUS.dinding = d.dinding; if (d.lapak) STATUS.lapak = d.lapak; if (d.vote) { STATUS.voteHasil = d.vote.hasil; STATUS.voteMinggu = d.vote.minggu; }
       aku.beruntun = STATUS.absen ? STATUS.absen.beruntun : 0;
-      perbaruiTombolAbsen(); gambarPasar(); segarkanPanel();
+      perbaruiTombolAbsen(); gambarPasar(); segarkanPanel(); cekLapakKosong();
     }
     else if (m.t === 'masuk') { if (m.p.id !== idSaya) { var mm = perbaruiMurid(m.p.id, m.p); mm.x = mm.tx; mm.y = mm.ty; taruh(mm); } }
     else if (m.t === 'gerak') { if (m.id !== idSaya && murid[m.id]) perbaruiMurid(m.id, { x:m.x, y:m.y }); }
@@ -484,7 +485,9 @@ var ATURAN_LAPAK = '<details class="aturan"><summary>Syarat &amp; aturan lapak</
   + '<li>Transaksi langsung antara pembeli dan penjual. Sekolah UMKM Kreova tidak ikut menerima pembayaran dan tidak menjamin pengiriman.</li>'
   + '<li>Lapak yang dilaporkan dan terbukti menipu atau melanggar aturan akan dihapus.</li>'
   + '<li>Lapak yang tidak aktif 30 hari bisa diberikan ke murid lain.</li></ul></details>';
-var editLapak = false, drafLapak = null;
+var editLapak = false, drafLapak = null, sudahDiingatkan = false;
+function lapakKosong() { var l = STATUS.lapakSaya; return !!(l && l.status === 'tampil' && l.isi && !l.isi.deskripsi && !(l.isi.produk || []).length); }
+function cekLapakKosong() { if (sudahDiingatkan || !lapakKosong()) return; sudahDiingatkan = true; setTimeout(function () { if (panel.classList.contains('on')) return; tampilPanel('pasar'); toast('Lapakmu sudah punya halaman sendiri. Yuk lengkapi!'); }, 4500); }
 function barisLapak(l) { return '<a class="baris-lapak" href="' + esc(linkLapak(l.slug)) + '" target="_blank" rel="noopener">' + (l.foto ? '<img src="/foto/' + esc(l.foto) + '.jpg" alt="" loading="lazy">' : '<span class="tanpa-foto">' + esc(l.usaha.charAt(0)) + '</span>') + '<span><b>' + esc(l.usaha) + '</b><small>' + esc(l.kategori) + (l.perintis ? ' · ★ Perintis' : '') + '</small></span></a>'; }
 function panelPasar() {
   var lp = STATUS.lapak || {}, pil = lp.pilihan || [], semua = lp.semua || [];
@@ -511,7 +514,8 @@ function bagianLapakSaya() {
       + '<input class="f link-salin" readonly value="' + esc(linkUndangan()) + '" aria-label="Link undanganmu"><div class="dua"><button class="tombol putih kecil" data-salin="' + esc(linkUndangan()) + '">Salin link</button><button class="tombol kuning kecil" data-bagikan="undangan">Bagikan</button></div></div>';
     return h;
   }
-  if ((l && (l.status === 'tampil' || l.status === 'menunggu')) && !editLapak) return h + '<button class="tombol putih" data-aksi="editLapak">Ubah isi lapak</button>' + (l.status === 'tampil' ? kartuRekomendasi('buka') : '');
+  if (l && l.status === 'tampil' && lapakKosong()) h += '<div class="kartu saran"><b>Lapakmu masih kosong</b><p class="rak-isi">Tambahkan foto asli, deskripsi, dan nomor WA atau link toko. Lapak yang lengkap dipajang di depan Pasar Sekolah dan bisa tampil di video Bu Naya.</p></div>';
+  if ((l && (l.status === 'tampil' || l.status === 'menunggu')) && !editLapak && !lapakKosong()) return h + '<button class="tombol putih" data-aksi="editLapak">Ubah isi lapak</button>' + (l.status === 'tampil' ? kartuRekomendasi('buka') : '');
   return h + formLapak();
 }
 function isiDraf() {
