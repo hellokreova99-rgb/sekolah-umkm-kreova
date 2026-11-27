@@ -57,7 +57,7 @@ function buatPeta() {
     o.push('<rect x="' + px + '" y="' + py + '" width="126" height="120" rx="10" fill="#CFA26C" stroke="#FFF6E2" stroke-width="4" stroke-dasharray="14 10"/><rect x="' + (cx - 3) + '" y="' + (cy - 4) + '" width="6" height="46" fill="#8A5A34"/><rect x="' + (cx - 30) + '" y="' + (cy - 36) + '" width="60" height="38" rx="6" fill="#14204F"/><text x="' + cx + '" y="' + (cy - 10) + '" text-anchor="middle" font-family="Plus Jakarta Sans,sans-serif" font-weight="800" font-size="20" fill="#F5C518">0' + (n++) + '</text>');
   }); });
   // koperasi (warung bergaris navy-kuning)
-  (function () { var g = '<g transform="translate(690 2680) scale(1.15)"><ellipse cy="66" rx="70" ry="12" opacity=".12"/><rect x="-58" y="10" width="116" height="56" fill="#F4E6CC"/><rect x="-44" y="26" width="88" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/><rect x="-58" y="48" width="116" height="18" fill="#A86E3E"/>';
+  (function () { var g = '<g transform="translate(610 2530) scale(1.2)"><ellipse cy="66" rx="70" ry="12" opacity=".12"/><rect x="-58" y="10" width="116" height="56" fill="#F4E6CC"/><rect x="-44" y="26" width="88" height="22" fill="#fff" stroke="#6A4A2E" stroke-width="3"/><rect x="-58" y="48" width="116" height="18" fill="#A86E3E"/>';
     for (var j = 0; j < 8; j++) g += '<rect x="' + (-64 + j * 16) + '" y="-8" width="16" height="24" fill="' + (j % 2 ? '#F5C518' : '#14204F') + '"/>';
     o.push(g + '</g>'); })();
   // pohon & pisang (hanya pemandangan, tidak menutupi tempat penting)
