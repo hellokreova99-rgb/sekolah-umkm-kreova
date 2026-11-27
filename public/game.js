@@ -13,7 +13,8 @@ var SEKOLAH = {
     episodeTerbaru: 'https://www.instagram.com/reel/DgMMINgz3hk/' // link video episode terbaru
   },
   pengumuman: [
-    { tanggal: '26 Nov 2026', judul: 'Koperasi Sekolah dibuka', isi: 'Buku paket pendamping pelajaran dan Seller Tools (gratis untuk murid) sudah ada di Koperasi, di kanan bawah dekat gerbang. Kelas tetap gratis.' },
+    { tanggal: '27 Nov 2026', judul: 'Pasar Sekolah: lapak punya halaman sendiri', isi: 'Setiap lapak murid sekarang punya link sendiri berisi produk, foto asli, deskripsi, dan tombol pesan via WhatsApp atau toko online. Pasang link-nya di bio! Lahan lapak baru dibuka dengan mengajak 3 teman daftar lewat link undanganmu.' },
+    { tanggal: '26 Nov 2026', judul: 'Koperasi Sekolah dibuka', isi: 'Buku paket pendamping pelajaran dan Seller Tools (gratis untuk murid) sudah ada di Koperasi, tepat di sebelah kanan gerbang. Kelas tetap gratis.' },
     { tanggal: '26 Nov 2026', judul: 'Hasil vote: Untung Bocor menang', isi: '8 dari 12 suara memilih Untung bocor. Kelas 01 "Untung Bocor" resmi dibuka. Kotak Usulan putaran 2 sudah dibuka: pilih kelas berikutnya.' },
     { tanggal: '24 Nov 2026', judul: 'Penerimaan murid baru dibuka', isi: 'Daftar jadi murid, absen setiap hari, dan pilih pelajaran pertama di Kotak Usulan.' },
     { tanggal: 'Setiap hari', judul: 'Absen', isi: 'Tekan tombol Absen. Absen beruntun terlihat di kartumu.' },
@@ -51,7 +52,7 @@ var KATEGORI = ['Fashion','Makanan & Minuman','Kecantikan','Kerajinan','Rumah Ta
 /* Putaran 2: pilihan ke-n = Kelas 0(n+1). HARUS sama jumlahnya dengan JUMLAH_PILIHAN di server. */
 var PILIHAN = ['Chat di-ghosting','Perang harga','Pembeli nggak balik','Capek ngurus sendiri','Mulai dari nol'];
 var PUTARAN = 2;
-var SAPAAN = ['Halo, murid-murid UMKM!','Kelas 01 Untung Bocor sudah dibuka!','Koperasi sudah buka. Seller Tools gratis untuk murid!','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
+var SAPAAN = ['Halo, murid-murid UMKM!','Kelas 01 Untung Bocor sudah dibuka!','Koperasi sudah buka. Seller Tools gratis untuk murid!','Lapak di Pasar Sekolah sekarang punya link sendiri!','Ajak 3 teman daftar, lahan lapakmu terbuka.','Sudah absen hari ini?','Kurikulumnya kalian yang susun.','Mampir ke Kotak Usulan, ya!','Cari namamu di Dinding Angkatan!','Sampai ketemu di kelas!'];
 var KEPALA_NAYA = '<img src="/naya-kepala.svg" alt="">';
 
 /* ================= Avatar ================= */
@@ -80,9 +81,15 @@ function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function 
 function angka(n) { return Number(n || 0).toLocaleString('id-ID'); }
 var saya = bacaLokal('kreova_murid');
 var uid = bacaLokal('kreova_uid'); if (!uid || String(uid).length < 8) { uid = acak(16); simpanLokal('kreova_uid', uid); }
+/* Link undangan teman: ?ajak=KODE (disimpan sampai murid baru mendaftar) */
+(function () { try { var k = new URLSearchParams(location.search).get('ajak'); if (k && /^[a-z0-9]{4,8}$/.test(k) && !saya) simpanLokal('kreova_ajak', k); if (k) history.replaceState(null, '', location.pathname); } catch (e) {} })();
+function bersihIG(v) { var s = String(v || '').trim().toLowerCase(), m = s.match(/instagram\.com\/([a-z0-9._]+)/); if (m) s = m[1]; s = s.replace(/^@+/, '').replace(/[^a-z0-9._]/g, '').slice(0, 30); return /^[a-z0-9._]{2,30}$/.test(s) ? s : ''; }
 
 /* ================= Status sekolah (dari server) ================= */
-var STATUS = { online:false, total:null, no:null, absen:null, vote:null, voteHasil:null, voteMinggu:null, lapakSaya:null, lapak:[], dinding:null };
+var STATUS = { online:false, total:null, no:null, absen:null, vote:null, voteHasil:null, voteMinggu:null, lapakSaya:null, lapak:{ pilihan:[], semua:[], syarat:3 }, dinding:null, ig:'', kode:'', undangan:{ masuk:0, sah:0, syarat:3 }, bolehLapak:false };
+function terapkanSaya(s) { s = s || {}; STATUS.no = s.no; STATUS.absen = s.absen; STATUS.vote = s.vote; STATUS.lapakSaya = s.lapak; STATUS.ig = s.ig || ''; STATUS.kode = s.kode || ''; STATUS.undangan = s.undangan || STATUS.undangan; STATUS.bolehLapak = !!s.bolehLapak; }
+function linkUndangan() { return location.origin + '/?ajak=' + STATUS.kode; }
+function linkLapak(slug) { return location.origin + '/lapak/' + slug; }
 
 /* ================= Kamera ================= */
 var W = 1080, H = 2880;
@@ -179,7 +186,7 @@ function sambungServer(url) {
   function buka() {
     statusOnline(0, 'Menghubungkan…');
     try { ws = new WebSocket(url); } catch (e) { return ulang(); }
-    ws.onopen = function () { jeda = 1000; kirim({ t:'masuk', uid:uid, nama:saya.nama, jualan:saya.jualan, look:saya.look, x:Math.round(aku.tx), y:Math.round(aku.ty), baru:baruDaftar }); };
+    ws.onopen = function () { jeda = 1000; kirim({ t:'masuk', uid:uid, nama:saya.nama, jualan:saya.jualan, ig:saya.ig || '', look:saya.look, x:Math.round(aku.tx), y:Math.round(aku.ty), baru:baruDaftar, ajak:baruDaftar ? (bacaLokal('kreova_ajak') || '') : '' }); };
     ws.onmessage = function (ev) { var m; try { m = JSON.parse(ev.data); } catch (e) { return; } if (m && typeof m === 'object') terima(m); };
     ws.onclose = function () { STATUS.online = false; ulang(); };
     ws.onerror = function () { try { ws.close(); } catch (e) {} };
@@ -192,8 +199,9 @@ function sambungServer(url) {
       (m.murid || []).forEach(function (p) { if (p.id === idSaya) return; var mm = perbaruiMurid(p.id, p); mm.x = mm.tx; mm.y = mm.ty; taruh(mm); });
       statusOnline(m.online); STATUS.total = m.total; perbaruiTarget();
       if (m.nama && m.nama !== saya.nama) { saya.nama = m.nama; aku.nama = m.nama; tulisTag(aku); }
-      var s = m.saya || {}; STATUS.no = s.no; STATUS.absen = s.absen; STATUS.vote = s.vote; STATUS.lapakSaya = s.lapak;
-      var d = m.dunia || {}; STATUS.dinding = d.dinding; STATUS.lapak = d.lapak || []; if (d.vote) { STATUS.voteHasil = d.vote.hasil; STATUS.voteMinggu = d.vote.minggu; }
+      terapkanSaya(m.saya); if (baruDaftar) { try { localStorage.removeItem('kreova_ajak'); } catch (e) {} baruDaftar = false; }
+      if (STATUS.ig && !saya.ig) { saya.ig = STATUS.ig; simpanLokal('kreova_murid', saya); }
+      var d = m.dunia || {}; STATUS.dinding = d.dinding; if (d.lapak) STATUS.lapak = d.lapak; if (d.vote) { STATUS.voteHasil = d.vote.hasil; STATUS.voteMinggu = d.vote.minggu; }
       aku.beruntun = STATUS.absen ? STATUS.absen.beruntun : 0;
       perbaruiTombolAbsen(); gambarPasar(); segarkanPanel();
     }
@@ -205,8 +213,16 @@ function sambungServer(url) {
     else if (m.t === 'ubah') { if (m.p.id !== idSaya) perbaruiMurid(m.p.id, m.p); }
     else if (m.t === 'absen') { STATUS.absen = { beruntun:m.beruntun, jumlah:m.jumlah, sudahHariIni:true }; aku.beruntun = m.beruntun; perbaruiTombolAbsen(); toast(m.baru ? (m.beruntun > 1 ? 'Hadir! ' + m.beruntun + ' hari beruntun' : 'Hadir! Absen hari ini tercatat') : 'Kamu sudah absen hari ini'); segarkanPanel(); }
     else if (m.t === 'vote') { STATUS.voteHasil = m.hasil; STATUS.voteMinggu = m.minggu; if (m.pilihan != null) { STATUS.vote = m.pilihan; toast('Pilihanmu tercatat'); } segarkanPanel(); }
-    else if (m.t === 'pasar') { STATUS.lapak = m.lapak || []; gambarPasar(); segarkanPanel(); }
-    else if (m.t === 'lapakSaya') { STATUS.lapakSaya = m.lapak; segarkanPanel(); if (m.lapak && m.lapak.status === 'menunggu') toast('Lapakmu dikirim, menunggu persetujuan'); if (m.lapak && m.lapak.status === 'tampil') toast('Lapakmu sudah tampil di Pasar Murid!'); }
+    else if (m.t === 'pasar') { if (m.lapak) STATUS.lapak = m.lapak; gambarPasar(); segarkanPanel(); }
+    else if (m.t === 'status') {
+      var sebelum = STATUS.lapakSaya ? STATUS.lapakSaya.status : null, bolehDulu = STATUS.bolehLapak;
+      terapkanSaya(m.saya); segarkanPanel();
+      var kini = STATUS.lapakSaya ? STATUS.lapakSaya.status : null;
+      if (m.info === 'setuju' && kini === 'tampil') toast('Lapakmu sudah tampil di Pasar Sekolah!');
+      else if (m.info === 'tolak') toast('Pengajuan lapakmu belum disetujui. Cek di Pasar Sekolah.');
+      else if (!bolehDulu && STATUS.bolehLapak) toast('Lahan lapakmu terbuka! Isi lapakmu di Pasar Sekolah.');
+      else if (sebelum !== kini && kini === 'tampil') toast('Lapakmu sudah tampil di Pasar Sekolah!');
+    }
     else if (m.t === 'hasilCari') { var el = document.getElementById('hasil-cari'); if (el) el.innerHTML = m.hasil.length ? '<div class="daftar-nama">' + m.hasil.map(barisNama).join('') + '</div>' : '<p class="catatan">Nama "' + esc(m.q) + '" belum ada di dinding.</p>'; }
     else if (m.t === 'dinding') { var dl = document.getElementById('daftar-dinding'); if (dl) { dl.insertAdjacentHTML('beforeend', m.isi.map(barisNama).join('')); var lb = document.getElementById('lebih-dinding'); if (lb) { if ((m.hal + 1) * 60 >= m.total) lb.remove(); else lb.dataset.hal = m.hal + 1; } } }
     else if (m.t === 'reset') { try { localStorage.removeItem('kreova_murid'); } catch (e) {} location.reload(); }
@@ -217,7 +233,7 @@ function sambungServer(url) {
     mode:'server',
     gerak:function (x, y) { clearTimeout(antrean); var tunggu = Math.max(0, 180 - (Date.now() - tGerak)); antrean = setTimeout(function () { tGerak = Date.now(); kirim({ t:'gerak', x:x, y:y }); }, tunggu); },
     ngobrol:function (i, ke) { kirim({ t:'ngobrol', i:i, ke:ke || null }); },
-    ubah:function () { kirim({ t:'ubah', nama:saya.nama, jualan:saya.jualan, look:saya.look }); },
+    ubah:function () { kirim({ t:'ubah', nama:saya.nama, jualan:saya.jualan, ig:saya.ig || '', look:saya.look }); },
     kirim:kirim
   };
   setInterval(function () { if (ws && ws.readyState === 1) ws.send('ping'); }, 25000);
@@ -287,7 +303,7 @@ document.getElementById('home').onclick = function () { terbang(aku ? aku.x : 43
 addEventListener('resize', render);
 
 /* ================= Titik peta ================= */
-var TITIK = { gerbang:[430,2530], pengumuman:[170,2210], usulan:[690,2205], kaskelas:[180,2735], koperasi:[690,2775], dinding:[745,1985], pasar:[142,1540], naya:[455,2665] };
+var TITIK = { gerbang:[430,2530], pengumuman:[170,2210], usulan:[690,2205], kaskelas:[230,2650], koperasi:[560,2650], dinding:[745,1985], pasar:[142,1540], naya:[455,2665] };
 var kelasPos = [[205,1770],[370,1770],[535,1770],[205,1960],[370,1960],[535,1960]];
 var LAPAK_POS = [[70,1250],[142,1250],[214,1250],[70,1340],[142,1340],[214,1340],[70,1430],[142,1430],[214,1430],[70,1520],[142,1520],[214,1520]];
 /* Gedung kelas yang sudah dibangun (menutupi kavling kosong) */
@@ -301,13 +317,15 @@ SEKOLAH.kelas.forEach(function (k, i) {
   b.innerHTML = k.status === 'buka' ? GEDUNG_KELAS(k.no) + '<span class="buka-badge">Kelas dibuka</span>' : '<span class="gembok" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2.6" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>';
   wadahKelas.appendChild(b);
 });
+var GEMBOK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 var SVG_LAPAK = function (isi) { return '<svg viewBox="0 0 62 60" aria-hidden="true"><ellipse cx="31" cy="57" rx="28" ry="4" fill="#000" opacity=".15"/><rect x="6" y="22" width="50" height="34" fill="' + (isi ? '#F4E6CC' : '#EADBC2') + '"/><rect x="10" y="40" width="42" height="14" fill="' + (isi ? '#A86E3E' : '#C9B79B') + '"/>'
   + (isi ? '<rect x="3" y="12" width="8" height="14" fill="#14204F"/><rect x="11" y="12" width="8" height="14" fill="#F5C518"/><rect x="19" y="12" width="8" height="14" fill="#14204F"/><rect x="27" y="12" width="8" height="14" fill="#F5C518"/><rect x="35" y="12" width="8" height="14" fill="#14204F"/><rect x="43" y="12" width="8" height="14" fill="#F5C518"/><rect x="51" y="12" width="8" height="14" fill="#14204F"/>' : '<rect x="3" y="12" width="56" height="14" fill="#CDBEA5"/>') + '</svg>'; };
 function gambarPasar() {
-  var w = document.getElementById('lapak-lapisan'), h = '';
+  var w = document.getElementById('lapak-lapisan'), h = '', pil = STATUS.lapak.pilihan || [];
   LAPAK_POS.forEach(function (p, i) {
-    var l = STATUS.lapak[i];
-    h += '<button class="lapak' + (l ? '' : ' kosong') + '" data-lapak="' + i + '" style="left:' + p[0] + 'px;top:' + p[1] + 'px;z-index:' + p[1] + '" aria-label="' + (l ? 'Lapak ' + esc(l.usaha) : 'Lapak kosong') + '">' + SVG_LAPAK(!!l) + (l ? '<span class="papan">' + esc(l.usaha) + '</span>' : '') + '</button>';
+    var l = i < 3 ? pil[i] : null, kunci = i >= 3;
+    h += '<button class="lapak' + (l ? '' : ' kosong') + (kunci ? ' terkunci' : '') + '" data-lapak="' + i + '" style="left:' + p[0] + 'px;top:' + p[1] + 'px;z-index:' + p[1] + '" aria-label="' + (l ? 'Lapak pilihan ' + esc(l.usaha) : kunci ? 'Lahan lapak terkunci' : 'Lahan lapak kosong') + '">' + SVG_LAPAK(!!l)
+      + (l ? '<span class="papan">' + esc(l.usaha) + '</span>' : '') + (kunci ? '<span class="gembok-lapak" aria-hidden="true">' + GEMBOK + '</span>' : '') + '</button>';
   });
   w.innerHTML = h;
 }
@@ -326,7 +344,7 @@ function aksiTitik(el) {
   if (!aku) return;
   if (el.id === 'naya') { jalanKe(TITIK.naya[0], TITIK.naya[1], sapaNaya); return; }
   if (el.dataset.murid) { bukaKartuLain(el.dataset.murid); return; }
-  if (el.dataset.lapak != null) { var i = +el.dataset.lapak, l = STATUS.lapak[i]; jalanKe(LAPAK_POS[i][0], LAPAK_POS[i][1] + 30, function () { if (l) tampilPanel('lapakLain', i); else tampilPanel('pasar'); }); return; }
+  if (el.dataset.lapak != null) { var i = +el.dataset.lapak, l = i < 3 ? (STATUS.lapak.pilihan || [])[i] : null; jalanKe(LAPAK_POS[i][0], LAPAK_POS[i][1] + 30, function () { if (l) tampilPanel('lapakLain', l.slug); else tampilPanel('pasar'); }); return; }
   var s = el.dataset.spot;
   if (s === 'kelas') { var k = +el.dataset.i; jalanKe(kelasPos[k][0], kelasPos[k][1] + 70, function () { tampilPanel('kelas', k); }); return; }
   jalanKe(TITIK[s][0], TITIK[s][1], function () { tampilPanel(s); });
@@ -337,7 +355,6 @@ function sapaNaya() { var b = document.getElementById('bubble-naya'); b.textCont
 /* ================= Panel ================= */
 function tombolLink(url, teks, kelas) { return url ? '<a class="tombol ' + kelas + '" href="' + esc(url) + '" target="_blank" rel="noopener">' + teks + '</a>' : '<span class="tombol ' + kelas + '" aria-disabled="true">' + teks + ' · segera</span>'; }
 function barisNama(d) { return '<div' + (d.no === STATUS.no ? ' class="saya"' : '') + '><b>#' + angka(d.no) + '</b>' + esc(d.nama) + '</div>'; }
-var GEMBOK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
 var PANEL = {
   gerbang:function () {
     var abs = STATUS.absen;
@@ -345,6 +362,7 @@ var PANEL = {
       + '<div class="kepala-naya">' + KEPALA_NAYA + '</div>'
       + '<p class="p-teks">Aku Bu Naya, kepala sekolah di sini. Sekolah UMKM Kreova tidak punya gedung dan tidak ada SPP. Kurikulumnya <b>kalian yang ikut susun</b>.</p>'
       + '<p class="p-teks" style="clear:both">' + (STATUS.no ? 'Kamu murid <b>ke-' + angka(STATUS.no) + '</b>. ' : '') + (abs && abs.sudahHariIni ? 'Absen hari ini sudah tercatat.' : 'Jangan lupa absen hari ini.') + '</p>'
+      + (STATUS.online && !STATUS.ig ? '<div class="kartu"><b>Lengkapi kartu murid</b><p class="rak-isi">Tulis akun Instagram-mu supaya bisa buka lapak di Pasar Sekolah.</p><button class="tombol kuning kecil" data-aksi="kartu">Isi akun IG</button></div>' : '')
       + (abs && abs.sudahHariIni ? '' : '<button class="tombol kuning" data-aksi="absen">Absen hari ini</button>')
       + tombolLink(SEKOLAH.link.instagram, 'Follow di Instagram', 'utama') + tombolLink(SEKOLAH.link.tiktok, 'Follow di TikTok', 'putih') + tombolLink(SEKOLAH.link.grupFB, 'Gabung Grup FB murid', 'putih');
   },
@@ -371,20 +389,12 @@ var PANEL = {
       + '<form class="baris-cari" id="form-cari"><label class="sr" for="in-cari" style="position:absolute;left:-9999px">Cari nama</label><input id="in-cari" maxlength="16" placeholder="Cari namamu…"><button type="submit">Cari</button></form><div id="hasil-cari"></div>'
       + (d ? '<p class="p-label" style="margin-top:14px">TERBARU</p><div class="daftar-nama" id="daftar-dinding">' + d.terbaru.map(barisNama).join('') + '</div>' + (d.total > d.terbaru.length ? '<button class="tombol putih" id="lebih-dinding" data-hal="0">Lihat semua nama</button>' : '') : '<p class="catatan">Daftar nama tampil saat sekolah sudah online di servernya.</p>');
   },
-  pasar:function () {
-    var l = STATUS.lapakSaya, status = '';
-    if (l && l.status === 'menunggu') status = '<div class="kartu"><small>Lapakmu</small><b>' + esc(l.usaha) + '</b> · ' + esc(l.kategori) + '<div class="catatan" style="margin:4px 0 0">Menunggu persetujuan pengurus sekolah.</div></div>';
-    else if (l && l.status === 'tampil') status = '<div class="kartu"><small>Lapakmu</small><b>' + esc(l.usaha) + '</b> · ' + esc(l.kategori) + '<div class="catatan" style="margin:4px 0 0">Sudah tampil di Pasar Murid.</div></div>';
-    else if (l && l.status === 'ditolak') status = '<div class="kartu"><small>Lapakmu</small><b>' + esc(l.usaha) + '</b><div class="catatan" style="margin:4px 0 0">Belum disetujui. Coba ajukan dengan nama usaha yang jelas.</div></div>';
-    return '<p class="p-label">PASAR MURID</p><h2 class="p-judul" id="p-judul">Buka lapakmu</h2>'
-      + '<p class="p-teks">Setiap murid boleh punya satu lapak di Pasar Murid supaya usahanya dikenal murid lain. Lapak tampil setelah disetujui pengurus sekolah.</p>' + status
-      + '<form id="form-lapak"><label class="f" for="in-usaha">Nama usaha</label><input class="f" id="in-usaha" maxlength="22" placeholder="Contoh: Rina Hijab" value="' + esc(l ? l.usaha : '') + '">'
-      + '<label class="f" for="in-kategori">Kategori</label><select class="f" id="in-kategori">' + KATEGORI.map(function (k) { return '<option' + (l && l.kategori === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select>'
-      + '<button class="tombol kuning" type="submit">' + (l ? 'Ajukan ulang lapak' : 'Ajukan lapak') + '</button></form>'
-      + '<p class="catatan">Tanpa link dan nomor HP: tautan dan nomor otomatis dihapus supaya aman dari penipuan.</p>';
-  },
-  lapakLain:function (i) { var l = STATUS.lapak[i]; if (!l) return PANEL.pasar();
-    return '<p class="p-label">LAPAK MURID · ' + esc(l.kategori).toUpperCase() + '</p><h2 class="p-judul" id="p-judul">' + esc(l.usaha) + '</h2><p class="p-teks">Pemilik: <b>' + esc(l.nama) + '</b>. Sapa pemiliknya kalau ketemu di sekolah, atau cari di Grup FB murid.</p><button class="tombol putih" data-ke="pasar">Buka lapakku juga</button>'; },
+  pasar:function () { return panelPasar(); },
+  lapakLain:function (slug) { var l = (STATUS.lapak.semua || []).filter(function (x) { return x.slug === slug; })[0]; if (!l) return panelPasar();
+    return '<p class="p-label">LAPAK MURID · ' + esc(l.kategori).toUpperCase() + '</p><h2 class="p-judul" id="p-judul">' + esc(l.usaha) + '</h2>'
+      + (l.perintis ? '<span class="lencana">★ Lapak Perintis</span>' : '') + (l.foto ? '<img class="lapak-foto" src="/foto/' + esc(l.foto) + '.jpg" alt="Foto produk ' + esc(l.usaha) + '">' : '')
+      + (l.deskripsi ? '<p class="p-teks">' + esc(l.deskripsi) + '</p>' : '')
+      + '<a class="tombol kuning" href="' + esc(linkLapak(l.slug)) + '" target="_blank" rel="noopener">Lihat produk &amp; pesan</a><button class="tombol putih" data-ke="pasar">Lihat semua lapak</button>'; },
   koperasi:function () { var k = SEKOLAH.koperasi;
     if (!k.buka) return '<p class="p-label">KOPERASI SEKOLAH</p><span class="gembok-besar">' + GEMBOK + ' Masih terkunci</span><h2 class="p-judul" id="p-judul">Koperasi segera dibuka</h2><p class="p-teks">Di sini nanti tersedia buku paket untuk setiap pelajaran.</p>';
     function rp(n) { return n ? 'Rp' + angka(n) : 'Gratis'; }
@@ -410,11 +420,12 @@ function bukaKartuLain(id) {
     + '<button class="tombol kuning" data-sapa="' + esc(id) + '">Sapa ' + esc(m.nama) + '</button><button class="tombol putih" data-dekati="' + esc(id) + '">Jalan ke dekatnya</button>', null);
 }
 var panel = document.getElementById('panel'), scrim = document.getElementById('scrim'), isi = document.getElementById('p-isi'), fokusSebelum = null;
-function tampilPanel(nama, arg) { bukaPanel(PANEL[nama](arg), { nama:nama, arg:arg }); }
+function tampilPanel(nama, arg) { if (nama === 'pasar' && !(panelAktif && panelAktif.nama === 'pasar')) { editLapak = false; drafLapak = null; } bukaPanel(PANEL[nama](arg), { nama:nama, arg:arg }); }
 function bukaPanel(html, info) { if (!panel.classList.contains('on')) fokusSebelum = document.activeElement; panelAktif = info || null; isi.innerHTML = html; panel.scrollTop = 0; panel.classList.add('on'); scrim.classList.add('on'); document.getElementById('tutup').focus(); }
 function segarkanPanel() {
   if (!panel.classList.contains('on') || !panelAktif) return;
   if (['usulan', 'pasar', 'gerbang', 'pengumuman'].indexOf(panelAktif.nama) < 0) return;
+  if (panelAktif.nama === 'pasar' && document.getElementById('form-lapak')) return;
   var ae = document.activeElement, sedangKetik = ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT') && isi.contains(ae);
   if (sedangKetik) return;
   var gulir = panel.scrollTop; isi.innerHTML = PANEL[panelAktif.nama](panelAktif.arg); panel.scrollTop = gulir;
@@ -446,11 +457,7 @@ isi.addEventListener('click', function (e) {
 isi.addEventListener('submit', function (e) {
   e.preventDefault();
   if (e.target.id === 'form-cari') { var q = document.getElementById('in-cari').value.trim(); if (q.length < 2) { toast('Ketik minimal 2 huruf'); return; } if (butuhServer()) jaringan.kirim({ t:'cari', q:q }); }
-  if (e.target.id === 'form-lapak') {
-    var usaha = document.getElementById('in-usaha').value.trim(), kategori = document.getElementById('in-kategori').value;
-    if (usaha.length < 3) { toast('Nama usaha minimal 3 huruf'); return; }
-    if (butuhServer()) { jaringan.kirim({ t:'lapak', usaha:usaha, kategori:kategori }); document.activeElement.blur(); }
-  }
+  if (e.target.id === 'form-lapak') { if (butuhServer()) kirimLapak(); }
 });
 document.getElementById('btn-ngobrol').onclick = function () { if (aku) tampilPanel('ngobrol'); };
 document.getElementById('btn-kartu').onclick = function () { bukaDaftar(true); };
@@ -460,6 +467,136 @@ function perbaruiTombolAbsen() {
   if (a && a.sudahHariIni) { b.className = 'aksi hadir'; b.textContent = 'Hadir ✓' + (a.beruntun > 1 ? ' · ' + a.beruntun + ' hari' : ''); }
   else { b.className = 'aksi kuning'; b.textContent = 'Absen hari ini'; }
 }
+
+/* ================= Pasar Sekolah ================= */
+var REKOMENDASI = { wa: { nama:'Jilid 2 · Script Balasan', link:'https://lynk.id/heykreova/v98wdkdm2ml7', teks:'Biar chat pembeli dari lapakmu nggak di-ghosting: 30 balasan siap salin.' },
+  buka: { nama:'Paket Chat Jualan (Jilid 1 + 2)', link:'https://lynk.id/heykreova/z6pz2krloq7m', teks:'Lapakmu sudah tampil. Siapkan cara membalas pembeli yang mulai bertanya: membaca pembeli + 30 script balasan.' },
+  fashion: { nama:'Buku Paket Bisnis Fashion Online', link:'https://lynk.id/heykreova/dxon45kk6qdp', teks:'Jualan fashion? Dari pilih produk, hitung HPP, sampai rencana 30 hari.' } };
+function kartuRekomendasi(k) { var r = REKOMENDASI[k]; return '<div class="kartu saran"><small>Buku paket yang cocok</small><b>' + esc(r.nama) + '</b><p class="rak-isi">' + esc(r.teks) + '</p><a class="tombol utama kecil" href="' + esc(r.link) + '" target="_blank" rel="noopener">Lihat di Koperasi</a></div>'; }
+var ATURAN_LAPAK = '<details class="aturan"><summary>Syarat &amp; aturan lapak</summary><ol>'
+  + '<li>Daftar jadi murid dan tulis akun IG-mu sendiri di kartu murid.</li>'
+  + '<li>Follow @hey.kreova dan absen "Hadir, Bu Naya" di komentar postingan kami.</li>'
+  + '<li>Ajak 3 teman daftar lewat link undanganmu. Teman dihitung setelah absen di 2 hari berbeda.</li>'
+  + '<li>Isi lapakmu: nama toko, produk, deskripsi, foto asli, dan WA atau link toko online.</li>'
+  + '<li>Lapak dicek Bu Naya dulu. Setiap perubahan juga dicek ulang.</li></ol><ul>'
+  + '<li>Jual produk asli milikmu sendiri, yang legal dan aman.</li>'
+  + '<li>Pakai akun IG dan foto milikmu sendiri. Lapak yang memakai milik orang lain akan dihapus.</li>'
+  + '<li>Transaksi langsung antara pembeli dan penjual. Sekolah UMKM Kreova tidak ikut menerima pembayaran dan tidak menjamin pengiriman.</li>'
+  + '<li>Lapak yang dilaporkan dan terbukti menipu atau melanggar aturan akan dihapus.</li>'
+  + '<li>Lapak yang tidak aktif 30 hari bisa diberikan ke murid lain.</li></ul></details>';
+var editLapak = false, drafLapak = null;
+function barisLapak(l) { return '<a class="baris-lapak" href="' + esc(linkLapak(l.slug)) + '" target="_blank" rel="noopener">' + (l.foto ? '<img src="/foto/' + esc(l.foto) + '.jpg" alt="" loading="lazy">' : '<span class="tanpa-foto">' + esc(l.usaha.charAt(0)) + '</span>') + '<span><b>' + esc(l.usaha) + '</b><small>' + esc(l.kategori) + (l.perintis ? ' · ★ Perintis' : '') + '</small></span></a>'; }
+function panelPasar() {
+  var lp = STATUS.lapak || {}, pil = lp.pilihan || [], semua = lp.semua || [];
+  var h = '<p class="p-label">PASAR SEKOLAH</p><h2 class="p-judul" id="p-judul">Lapak murid Sekolah UMKM Kreova</h2>'
+    + '<p class="p-teks">Setiap lapak punya halaman sendiri: produk, foto asli, dan tombol pesan. Linknya bisa dipasang di bio atau status WA.</p>';
+  if (pil.length) h += '<p class="p-label" style="margin-top:6px">LAPAK PILIHAN DI DEPAN</p>' + pil.map(barisLapak).join('');
+  var lain = semua.filter(function (l) { return !pil.some(function (x) { return x.slug === l.slug; }); });
+  if (lain.length) h += '<details class="semua-lapak"><summary>Semua lapak murid (' + angka(semua.length) + ')</summary>' + lain.map(barisLapak).join('') + '</details>';
+  h += '<p class="p-label" style="margin-top:18px">LAPAKMU</p>' + bagianLapakSaya() + ATURAN_LAPAK;
+  return h;
+}
+function bagianLapakSaya() {
+  if (!(jaringan.mode === 'server' && STATUS.online)) return '<p class="catatan">Lapakmu tampil di sini saat sekolah sudah online.</p>';
+  var l = STATUS.lapakSaya, u = STATUS.undangan || { masuk:0, sah:0, syarat:3 }, h = '';
+  if (!STATUS.ig) return '<div class="kartu"><b>Isi akun IG-mu dulu</b><p class="rak-isi">Lapak hanya untuk murid yang menulis akun Instagram miliknya sendiri di kartu murid.</p><button class="tombol kuning kecil" data-aksi="kartu">Isi akun IG di kartu murid</button></div>';
+  if (l && l.status === 'tampil') h += '<div class="kartu"><small>Lapakmu sudah tampil' + (l.perintis ? ' · ★ Lapak Perintis' : '') + '</small><b>' + esc(l.usaha) + '</b><input class="f link-salin" readonly value="' + esc(linkLapak(l.slug)) + '" aria-label="Link lapakmu"><div class="dua"><button class="tombol putih kecil" data-salin="' + esc(linkLapak(l.slug)) + '">Salin link</button><button class="tombol kuning kecil" data-bagikan="lapak">Bagikan</button></div><a class="tombol utama kecil" href="' + esc(linkLapak(l.slug)) + '" target="_blank" rel="noopener">Lihat halaman lapakku</a></div>';
+  else if (l && l.status === 'menunggu') h += '<div class="kartu"><small>Menunggu dicek Bu Naya</small><b>' + esc(l.usaha) + '</b><p class="rak-isi">' + (l.tampil ? 'Perubahan lapakmu sedang dicek. Versi lama tetap tampil sampai perubahan disetujui.' : 'Biasanya dicek dalam 1×24 jam. Pastikan kamu sudah follow @hey.kreova dan absen di komentar, karena itu ikut dicek.') + '</p>' + (l.slug ? '<a class="tombol putih kecil" href="' + esc(linkLapak(l.slug)) + '" target="_blank" rel="noopener">Lihat lapak yang tampil</a>' : '') + '</div>';
+  else if (l && (l.status === 'ditolak' || l.status === 'dihapus')) h += '<div class="kartu"><small>' + (l.status === 'ditolak' ? 'Belum disetujui' : 'Lapak dihapus') + '</small><b>' + esc(l.usaha) + '</b><p class="rak-isi">' + (l.alasan ? esc(l.alasan) : 'Cek lagi aturan lapak di bawah, lalu ajukan ulang.') + '</p></div>';
+  if (!STATUS.bolehLapak) {
+    var sah = Math.min(u.sah, u.syarat);
+    h += '<div class="kartu kunci-lahan"><small>Lahan lapakmu masih terkunci</small><b>Ajak ' + u.syarat + ' teman daftar, lahanmu terbuka</b>'
+      + '<div class="hasil"><div class="baris"><span class="bar"><i style="width:' + Math.round(sah / u.syarat * 100) + '%"></i></span><span class="n" style="width:auto">' + sah + '/' + u.syarat + '</span></div></div>'
+      + '<p class="rak-isi">Teman dihitung sah setelah daftar lewat link undanganmu dan absen di 2 hari berbeda.' + (u.masuk > u.sah ? ' Sudah daftar: <b>' + u.masuk + '</b>, menunggu absen: <b>' + (u.masuk - u.sah) + '</b>.' : '') + '</p>'
+      + '<input class="f link-salin" readonly value="' + esc(linkUndangan()) + '" aria-label="Link undanganmu"><div class="dua"><button class="tombol putih kecil" data-salin="' + esc(linkUndangan()) + '">Salin link</button><button class="tombol kuning kecil" data-bagikan="undangan">Bagikan</button></div></div>';
+    return h;
+  }
+  if ((l && (l.status === 'tampil' || l.status === 'menunggu')) && !editLapak) return h + '<button class="tombol putih" data-aksi="editLapak">Ubah isi lapak</button>' + (l.status === 'tampil' ? kartuRekomendasi('buka') : '');
+  return h + formLapak();
+}
+function isiDraf() {
+  var l = STATUS.lapakSaya, d = l && l.isi ? l.isi : {};
+  drafLapak = { usaha:d.usaha || (l ? l.usaha : '') || saya.jualan || '', kategori:d.kategori || (l ? l.kategori : '') || KATEGORI[0], deskripsi:d.deskripsi || '', wa:d.wa ? '0' + String(d.wa).slice(2) : '', izinWA:!!d.izinWA, link:d.link || '', legal:d.legal || '',
+    produk:[0, 1, 2].map(function (i) { var p = (d.produk || [])[i] || {}; return { nama:p.nama || '', harga:p.harga || '', foto:p.foto || null }; }) };
+}
+function formLapak() {
+  if (!drafLapak) isiDraf(); var d = drafLapak;
+  var h = '<form id="form-lapak" class="form-lapak"><p class="catatan" style="margin-top:0">Lahan lapakmu terbuka. Isi selengkap mungkin: lapak dengan foto asli lebih sering dipilih tampil di depan.</p>'
+    + '<label class="f" for="in-usaha">Nama toko</label><input class="f" id="in-usaha" name="usaha" maxlength="24" value="' + esc(d.usaha) + '" placeholder="Contoh: Rina Hijab">'
+    + '<label class="f" for="in-kategori">Kategori</label><select class="f" id="in-kategori" name="kategori">' + KATEGORI.map(function (k) { return '<option' + (d.kategori === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select>'
+    + '<label class="f" for="in-desk">Deskripsi jualan</label><textarea class="f" id="in-desk" name="deskripsi" maxlength="160" rows="3" placeholder="Contoh: Hijab voal adem, bisa grosir untuk reseller. Kirim dari Bandung.">' + esc(d.deskripsi) + '</textarea>'
+    + '<p class="f-judul">Produk (maks. 3, foto asli)</p>';
+  d.produk.forEach(function (p, i) {
+    var src = p.foto ? (p.foto.indexOf('data:') === 0 ? p.foto : '/foto/' + p.foto + '.jpg') : '';
+    h += '<div class="produk-isi"><label class="foto-pilih" for="in-foto' + i + '">' + (src ? '<img src="' + esc(src) + '" alt="Foto produk ' + (i + 1) + '">' : '<span>+ Foto</span>') + '</label><input type="file" accept="image/*" id="in-foto' + i + '" data-foto="' + i + '" hidden>'
+      + '<div><input class="f" data-pnama="' + i + '" maxlength="32" placeholder="Nama produk ' + (i + 1) + '" value="' + esc(p.nama) + '" aria-label="Nama produk ' + (i + 1) + '"><input class="f" data-pharga="' + i + '" maxlength="20" placeholder="Harga, mis. Rp45.000" value="' + esc(p.harga) + '" aria-label="Harga produk ' + (i + 1) + '">'
+      + (p.foto ? '<button type="button" class="hapus-foto" data-hapusfoto="' + i + '">Hapus foto</button>' : '') + '</div></div>';
+  });
+  h += '<p class="f-judul">Cara pesan (isi minimal satu)</p>'
+    + '<label class="f" for="in-wa">Nomor WhatsApp</label><input class="f" id="in-wa" name="wa" inputmode="tel" maxlength="16" value="' + esc(d.wa) + '" placeholder="0812xxxxxxx">'
+    + '<label class="centang"><input type="checkbox" id="in-izinwa"' + (d.izinWA ? ' checked' : '') + '> Nomor WA saya boleh ditampilkan di halaman lapak</label>'
+    + kartuRekomendasi('wa')
+    + '<label class="f" for="in-link">Link toko online</label><input class="f" id="in-link" name="link" inputmode="url" maxlength="300" value="' + esc(d.link) + '" placeholder="Link Shopee, Tokopedia, TikTok Shop, Lynk, IG…">'
+    + '<label class="f" for="in-legal">No. BPOM / PIRT / halal (opsional)</label><input class="f" id="in-legal" name="legal" maxlength="40" value="' + esc(d.legal) + '" placeholder="Wajib diisi untuk makanan & kosmetik bila ada">'
+    + '<label class="centang"><input type="checkbox" id="in-setuju"> Saya setuju dengan syarat &amp; aturan lapak, dan semua isi lapak ini milik saya sendiri</label>'
+    + '<div class="salah" id="salah-lapak" role="alert"></div><button class="tombol kuning" type="submit" id="kirim-lapak">' + (STATUS.lapakSaya && STATUS.lapakSaya.status === 'tampil' ? 'Kirim perubahan lapak' : 'Ajukan lapak') + '</button>'
+    + (d.kategori === 'Fashion' ? kartuRekomendasi('fashion') : '') + '</form>';
+  return h;
+}
+function simpanDraf() {
+  var f = document.getElementById('form-lapak'); if (!f || !drafLapak) return; var d = drafLapak;
+  d.usaha = f.querySelector('#in-usaha').value; d.kategori = f.querySelector('#in-kategori').value; d.deskripsi = f.querySelector('#in-desk').value;
+  d.wa = f.querySelector('#in-wa').value; d.izinWA = f.querySelector('#in-izinwa').checked; d.link = f.querySelector('#in-link').value; d.legal = f.querySelector('#in-legal').value;
+  d.produk.forEach(function (p, i) { p.nama = f.querySelector('[data-pnama="' + i + '"]').value; p.harga = f.querySelector('[data-pharga="' + i + '"]').value; });
+}
+function gambarUlangForm() { var f = document.getElementById('form-lapak'); if (!f) return; var gulir = panel.scrollTop; simpanDraf(); f.outerHTML = formLapak(); panel.scrollTop = gulir; }
+function kecilkanFoto(file, cb) {
+  var url = URL.createObjectURL(file), img = new Image();
+  img.onload = function () {
+    function coba(maks, q) { var s = Math.min(1, maks / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s); var x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height); x.drawImage(img, 0, 0, c.width, c.height); return c.toDataURL('image/jpeg', q); }
+    var hasil = coba(900, 0.78); if (hasil.length > 280000) hasil = coba(760, 0.66); if (hasil.length > 280000) hasil = coba(600, 0.6);
+    URL.revokeObjectURL(url); cb(hasil.length > 280000 ? null : hasil);
+  };
+  img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
+  img.src = url;
+}
+function salinTeks(t) {
+  function cadangan() { var i = document.createElement('textarea'); i.value = t; i.style.position = 'fixed'; i.style.opacity = '0'; document.body.appendChild(i); i.select(); try { document.execCommand('copy'); toast('Link disalin'); } catch (e) { toast('Tekan lama link di atas untuk menyalin'); } i.remove(); }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { toast('Link disalin'); }, cadangan); else cadangan();
+}
+function bagikan(jenis) {
+  var l = STATUS.lapakSaya, data = jenis === 'lapak' && l && l.slug
+    ? { title:l.usaha, text:'Mampir ke lapakku "' + l.usaha + '" di Pasar Sekolah UMKM Kreova:', url:linkLapak(l.slug) }
+    : { title:'Sekolah UMKM Kreova', text:'Aku belajar jualan gratis di Sekolah UMKM Kreova, sekolah virtual tanpa SPP. Daftar lewat link ini ya:', url:linkUndangan() };
+  if (navigator.share) navigator.share(data).catch(function () {}); else salinTeks(data.text + ' ' + data.url);
+}
+function kirimLapak() {
+  simpanDraf(); var d = drafLapak, salah = document.getElementById('salah-lapak'), btn = document.getElementById('kirim-lapak');
+  function gagal(t) { salah.textContent = t; }
+  if (d.usaha.trim().length < 3) return gagal('Nama toko minimal 3 huruf.');
+  if (d.deskripsi.trim().length < 10) return gagal('Ceritakan jualanmu di deskripsi (min. 10 huruf).');
+  if (!d.produk.some(function (p) { return p.nama.trim() || p.foto; })) return gagal('Tambahkan minimal 1 produk.');
+  if (!d.wa.trim() && !d.link.trim()) return gagal('Isi nomor WA atau link toko online.');
+  if (d.wa.trim() && !d.izinWA) return gagal('Centang izin tampil untuk nomor WA, atau kosongkan nomornya.');
+  if (!document.getElementById('in-setuju').checked) return gagal('Centang persetujuan aturan lapak dulu.');
+  gagal(''); btn.disabled = true; btn.textContent = 'Mengirim…';
+  fetch('/api/lapak', { method:'POST', headers:{ 'content-type':'application/json' }, body:JSON.stringify({ uid:uid, ig:STATUS.ig, usaha:d.usaha, kategori:d.kategori, deskripsi:d.deskripsi, wa:d.wa, izinWA:d.izinWA && !!d.wa.trim(), link:d.link, legal:d.legal, setuju:true, produk:d.produk }) })
+    .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.galat || 'Gagal mengirim'); return j; }); })
+    .then(function (j) { terapkanSaya(j.saya); editLapak = false; drafLapak = null; toast('Lapakmu dikirim. Tunggu dicek Bu Naya ya!'); var g = panel.scrollTop; isi.innerHTML = PANEL.pasar(); panel.scrollTop = g; })
+    .catch(function (e) { btn.disabled = false; btn.textContent = 'Coba kirim lagi'; gagal(e.message === 'Failed to fetch' ? 'Koneksi terputus. Coba lagi.' : e.message); });
+}
+isi.addEventListener('change', function (e) {
+  var f = e.target.closest('[data-foto]'); if (f && f.files && f.files[0]) { var i = +f.dataset.foto; simpanDraf(); toast('Menyiapkan foto…'); kecilkanFoto(f.files[0], function (hasil) { if (!hasil) { toast('Foto ini tidak bisa dipakai, coba foto lain'); return; } drafLapak.produk[i].foto = hasil; gambarUlangForm(); }); return; }
+  if (e.target.id === 'in-kategori') gambarUlangForm();
+});
+isi.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-salin]'); if (t) { salinTeks(t.dataset.salin); return; }
+  t = e.target.closest('[data-bagikan]'); if (t) { bagikan(t.dataset.bagikan); return; }
+  t = e.target.closest('[data-hapusfoto]'); if (t) { simpanDraf(); drafLapak.produk[+t.dataset.hapusfoto].foto = null; gambarUlangForm(); return; }
+  t = e.target.closest('[data-aksi="editLapak"]'); if (t) { editLapak = true; drafLapak = null; var g = panel.scrollTop; isi.innerHTML = PANEL.pasar(); panel.scrollTop = g; return; }
+  t = e.target.closest('[data-aksi="kartu"]'); if (t) { bukaDaftar(true); return; }
+  t = e.target.closest('.link-salin'); if (t) { t.select(); }
+});
 
 /* ================= HUD ================= */
 var hint = document.getElementById('hint'), hintMati = false;
@@ -488,7 +625,7 @@ formDaftar.addEventListener('click', function (e) {
 });
 function bukaDaftar(ubah) {
   tutupPanel();
-  if (saya) { document.getElementById('in-nama').value = saya.nama; document.getElementById('in-jualan').value = saya.jualan || ''; draf = { k:saya.look.k | 0, b:saya.look.b | 0, r:saya.look.r | 0, h:saya.look.h == null ? 2 : saya.look.h | 0 }; }
+  if (saya) { document.getElementById('in-nama').value = saya.nama; document.getElementById('in-jualan').value = saya.jualan || ''; document.getElementById('in-ig').value = saya.ig || STATUS.ig ? '@' + (saya.ig || STATUS.ig) : ''; document.getElementById('in-igsendiri').checked = !!(saya.ig || STATUS.ig); draf = { k:saya.look.k | 0, b:saya.look.b | 0, r:saya.look.r | 0, h:saya.look.h == null ? 2 : saya.look.h | 0 }; }
   document.getElementById('km-judul').textContent = ubah ? 'Ubah kartu murid' : 'Daftar jadi murid';
   isiPilihan(); document.getElementById('daftar').classList.add('on'); setTimeout(function () { document.getElementById('in-nama').focus(); }, 50);
 }
@@ -496,9 +633,12 @@ formDaftar.addEventListener('submit', function (e) {
   e.preventDefault();
   var nama = document.getElementById('in-nama').value.replace(/[<>]/g, '').trim().slice(0, 16);
   var jualan = document.getElementById('in-jualan').value.replace(/[<>]/g, '').trim().slice(0, 24);
+  var ig = bersihIG(document.getElementById('in-ig').value);
   if (nama.length < 2) { document.getElementById('salah').textContent = 'Isi nama panggilan minimal 2 huruf.'; return; }
+  if (!ig) { document.getElementById('salah').textContent = 'Isi akun Instagram-mu, contoh: @rinahijab'; return; }
+  if (!document.getElementById('in-igsendiri').checked) { document.getElementById('salah').textContent = 'Centang "Ini akun IG saya sendiri".'; return; }
   document.getElementById('salah').textContent = '';
-  saya = { nama:nama, jualan:jualan, look:{ k:draf.k, b:draf.b, r:draf.r, h:draf.h } };
+  saya = { nama:nama, jualan:jualan, ig:ig, look:{ k:draf.k, b:draf.b, r:draf.r, h:draf.h } }; STATUS.ig = ig;
   simpanLokal('kreova_murid', saya);
   document.getElementById('daftar').classList.remove('on');
   if (aku) { aku.nama = nama; aku.jualan = jualan; aku.look = saya.look; aku.el.querySelector('.tubuh').outerHTML = avatarSVG(saya.look); tulisTag(aku); if (jaringan.ubah) jaringan.ubah(); }
